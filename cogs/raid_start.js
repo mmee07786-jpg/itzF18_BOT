@@ -1,272 +1,739 @@
-const {
-    SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder,
-    ModalBuilder, TextInputBuilder, TextInputStyle,
-    ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder
-} = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 
-const CONFIG_FILE = path.join(__dirname, '../clan_config.json');
 const DATA_FILE = path.join(__dirname, '../raid_data.json');
-const MAX_BANNER_SIZE = 8 * 1024 * 1024; // 8MB
+const EMBED_COLOR = 0x8B0000;
+const GIF_BANNER_URL = "https://cdn.discordapp.com/attachments/1479214156560466045/1542918296322572338/Comp1-ezgif.com-crop-2.gif?ex=6aa4c663&is=6aa374e3&hm=4b16c8a711658887aa9f018379775fff77ef8c176114498832a5a3dc10e5b8eb&";
 
-function loadConfig() {
-    if (fs.existsSync(CONFIG_FILE)) {
-        try {
-            return JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
-        } catch (e) {
-            return { clan_name: "VLX", embed_color: 0x8B0000 };
-        }
-    }
-    return { clan_name: "VLX", embed_color: 0x8B0000 };
-}
-
-function saveConfig(config) {
-    fs.writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 4), 'utf8');
-}
+const OWNER_ID = "1107355943408259112";
+const BYPASS_IDS = new Set([OWNER_ID, "1182323811341840447"]);
+const adminCooldows = new Map();
+const pendingRaids = new Map(); // بيانات النافذة الأولى بانتظار النافذة الثانية
 
 function loadRaidData() {
     if (fs.existsSync(DATA_FILE)) {
         try {
-            const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-            const gid = Object.keys(data)[0];
-            if (gid && data[gid] && typeof data[gid] === 'object' && data[gid].raider_stats) {
-                return data[gid];
+            const d = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+            for (const g in d) {
+                if (typeof d[g] === 'object' && d[g] !== null) {
+                    if (!d[g].roblox_users) d[g].roblox_users = {};
+                    if (!d[g].member_countries) d[g].member_countries = {};
+                    if (!d[g].custom_avatars) d[g].custom_avatars = {};
+                    if (!d[g].blacklist) d[g].blacklist = [];
+                }
             }
-            return data.raider_stats ? data : { raider_stats: {}, win_streak: 0 };
+            return d;
         } catch (e) {
-            return { raider_stats: {}, win_streak: 0 };
+            return {};
         }
     }
-    return { raider_stats: {}, win_streak: 0 };
+    return {};
 }
 
-// مسار الصورة الدائمة (محفوظة كملف محلي لأن روابط ديسكورد تنتهي صلاحيتها)
-function getBannerPath(config) {
-    if (!config.banner_file) return null;
-    const p = path.join(__dirname, '..', path.basename(config.banner_file));
-    return fs.existsSync(p) ? p : null;
+function saveRaidData(d) {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(d, null, 4), 'utf8');
 }
 
-function clip(text) {
-    return `\`${String(text).replace(/`/g, "'").slice(0, 1000)}\``;
-}
-
-class RaidStartModal extends ModalBuilder {
+class RobloxTopAvatarModal extends ModalBuilder {
     constructor() {
         super();
-        this.setTitle("⚔️ | Raid Start & Announcement").setCustomId("raid_start_modal");
+        this.setTitle("🖼️ | تعيين صورة توب روبلوكس").setCustomId("roblox_top_avatar_modal");
 
-        const serverLink = new TextInputBuilder().setCustomId("server_link").setLabel("Server Link").setStyle(TextInputStyle.Short).setRequired(true);
-        const difficulty = new TextInputBuilder().setCustomId("difficulty").setLabel("Difficulty").setStyle(TextInputStyle.Short).setRequired(true);
-        const targets = new TextInputBuilder().setCustomId("targets").setLabel("Targets / Matchup").setStyle(TextInputStyle.Short).setRequired(true);
-        const counts = new TextInputBuilder().setCustomId("counts").setLabel("Our Count & Their Count").setStyle(TextInputStyle.Short).setRequired(true);
-        const region = new TextInputBuilder().setCustomId("region").setLabel("Region").setStyle(TextInputStyle.Short).setRequired(true);
+        const topPosition = new TextInputBuilder()
+            .setCustomId("top_position")
+            .setLabel("رقم التوب المراد تغييره (من 1 إلى 20)")
+            .setStyle(TextInputStyle.Short)
+            .setRequired(true)
+            .setPlaceholder("مثال: 1");
+
+        const avatarLink = new TextInputBuilder()
+            .setCustomId("avatar_link")
+            .setLabel("رابط الصورة أو يوزر/إيدي روبلوكس")
+            .setStyle(TextInputStyle.Short)
+            .setRequired(true)
+            .setPlaceholder("مثال: رابط مباشر أو يوزر روبلوكس");
+
+        this.addComponents(new ActionRowBuilder().addComponents(topPosition), new ActionRowBuilder().addComponents(avatarLink));
+    }
+}
+
+// النافذة الأولى (النتائج الأساسية للرايد)
+class RaidEndInfoModal extends ModalBuilder {
+    constructor() {
+        super();
+        this.setTitle("🏁 | Conclude Raid & Record Results").setCustomId("raid_end_info_modal");
+
+        const raidNumber = new TextInputBuilder().setCustomId("raid_number").setLabel("RAID Number").setStyle(TextInputStyle.Short).setRequired(true);
+        const enemy = new TextInputBuilder().setCustomId("enemy").setLabel("ENEMY").setStyle(TextInputStyle.Short).setRequired(true);
+        const ally = new TextInputBuilder().setCustomId("ally").setLabel("ALLY").setStyle(TextInputStyle.Short).setRequired(true);
+        const duration = new TextInputBuilder().setCustomId("duration").setLabel("DURATION").setStyle(TextInputStyle.Short).setRequired(true);
+        const statusReason = new TextInputBuilder().setCustomId("status_reason").setLabel("STATUS").setStyle(TextInputStyle.Short).setRequired(true);
 
         this.addComponents(
-            new ActionRowBuilder().addComponents(serverLink),
-            new ActionRowBuilder().addComponents(difficulty),
-            new ActionRowBuilder().addComponents(targets),
-            new ActionRowBuilder().addComponents(counts),
-            new ActionRowBuilder().addComponents(region)
+            new ActionRowBuilder().addComponents(raidNumber),
+            new ActionRowBuilder().addComponents(enemy),
+            new ActionRowBuilder().addComponents(ally),
+            new ActionRowBuilder().addComponents(duration),
+            new ActionRowBuilder().addComponents(statusReason)
         );
     }
 }
 
+// النافذة الثانية (المنشنات وروابط الإثبات)
+class RaidSubmitModal extends ModalBuilder {
+    constructor() {
+        super();
+        this.setTitle("👥 | MVPs & Media").setCustomId("raid_submit_modal");
+
+        const mvpsInput = new TextInputBuilder()
+            .setCustomId("mvps_input")
+            .setLabel("MVPs (منشنات الأعضاء)")
+            .setStyle(TextInputStyle.Paragraph)
+            .setRequired(true);
+
+        const mediaLinks = new TextInputBuilder()
+            .setCustomId("media_links")
+            .setLabel("Media Link (رابط الصورة / Proof)")
+            .setStyle(TextInputStyle.Paragraph)
+            .setRequired(false);
+
+        this.addComponents(new ActionRowBuilder().addComponents(mvpsInput), new ActionRowBuilder().addComponents(mediaLinks));
+    }
+}
+
 module.exports = {
-    async handleRaidStartModalSubmit(interaction, serverLink, difficulty, targets, counts, region) {
-        await interaction.deferReply({ ephemeral: true });
+    RaidSubmitModal,
+    RaidEndInfoModal,
 
-        try {
-            // تنظيف رابط السيرفر (زر الرابط يرفض أي شي مو رابط صحيح)
-            let link = String(serverLink).trim();
-            if (!/^https?:\/\//i.test(link)) link = `https://${link}`;
-            try {
-                new URL(link);
-            } catch (e) {
-                await interaction.editReply({ content: "❌ | رابط السيرفر غير صحيح! اكتب رابط كامل مثل `https://...`" });
-                return;
-            }
-
-            const config = loadConfig();
-            const clan = config.clan_name || "VLX";
-            const embedColor = config.embed_color || 0x8B0000;
-
-            const embed = new EmbedBuilder()
-                .setTitle("NEW RAID")
-                .setColor(embedColor)
-                .addFields(
-                    { name: "⚔️ Difficulty", value: clip(difficulty), inline: false },
-                    { name: "🎯 Targets", value: clip(targets), inline: false },
-                    { name: "🔢 Our Count & Their Count", value: clip(counts), inline: false },
-                    { name: "📡 Region", value: `🌍 ${clip(region)}`, inline: false },
-                    {
-                        name: "📜 Instructions",
-                        value: "→ Click **Join** below to enter the server\n→ Click **Leaderboard** to check top active raiders\n→ Follow callouts from raid leadership\n→ Stay until the raid is concluded",
-                        inline: false
-                    }
-                );
-
-            // الصورة الدائمة (تنحط بأمر /set-img-raid-start)
-            const files = [];
-            const bannerPath = getBannerPath(config);
-            if (bannerPath) {
-                const attachName = `raid_banner${path.extname(bannerPath)}`;
-                files.push(new AttachmentBuilder(bannerPath, { name: attachName }));
-                embed.setImage(`attachment://${attachName}`);
-            }
-
-            embed.setFooter({ text: `Raid Initiated by ${interaction.user.tag} | ${clan} Clan` });
-
-            const row = new ActionRowBuilder().addComponents(
-                new ButtonBuilder().setLabel("Join").setStyle(ButtonStyle.Link).setURL(link).setEmoji("🎮"),
-                new ButtonBuilder().setCustomId("show_leaderboard").setLabel("Leaderboard").setStyle(ButtonStyle.Secondary).setEmoji("🏆")
-            );
-
-            const channel = interaction.channel || await interaction.client.channels.fetch(interaction.channelId);
-            await channel.send({
-                content: "@here 🔔 **New Raid Notification:**",
-                embeds: [embed],
-                components: [row],
-                files
-            });
-            await interaction.deleteReply().catch(() => {});
-        } catch (e) {
-            console.error("خطأ في raid-start:", e);
-            await interaction.editReply({ content: `❌ | فشل نشر الإعلان: \`${e.message}\`` }).catch(() => {});
-        }
-    },
-
-    raidStartCommand: new SlashCommandBuilder()
-        .setName('raid-start')
-        .setDescription('[ Admin Only ] Start a raid with announcement')
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
-    setImgRaidStartCommand: new SlashCommandBuilder()
-        .setName('set-img-raid-start')
-        .setDescription('[ Admin Only ] تعيين صورة إعلان الرايد (تبقى دائمية مع كل raid-start)')
-        .addAttachmentOption(o => o.setName('image').setDescription('الصورة أو الـ GIF اللي تطلع تحت الإعلان').setRequired(true))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
-    nameClanCommand: new SlashCommandBuilder()
-        .setName('name_clan')
-        .setDescription('[ Admin Only ] تعيين اسم الكلان الظهور بإعلانات الرايد')
-        .addStringOption(o => o.setName('name').setDescription('اكتب اسم الكلان الجديد').setRequired(false))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
-    colorEmedCommand: new SlashCommandBuilder()
-        .setName('color_emed')
-        .setDescription('[ Admin Only ] تغيير لون شريط إعلان الرايد')
-        .addStringOption(o => o.setName('hex_code').setDescription('اكتب كود اللون (مثل #FF0000)').setRequired(true))
-        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
-    async handleRaidStart(interaction) {
-        await interaction.showModal(new RaidStartModal());
-    },
-
-    async handleSetImgRaidStart(interaction) {
-        const attachment = interaction.options.getAttachment('image');
-        const type = attachment.contentType || "";
-
-        if (!type.startsWith('image/')) {
-            await interaction.reply({ content: "❌ | لازم ترفع صورة (PNG / JPG / GIF / WEBP)!", ephemeral: true });
+    async handleRobloxTopAvatarSubmit(interaction) {
+        const posVal = interaction.fields.getTextInputValue("top_position").trim();
+        if (!/^\d+$/.test(posVal)) {
+            await interaction.reply({ content: "❌ | يرجى كتابة رقم توب صحيح بين 1 و 20!", ephemeral: true });
             return;
         }
-        if (attachment.size > MAX_BANNER_SIZE) {
-            await interaction.reply({ content: "❌ | حجم الصورة كبير، الحد الأقصى 8MB.", ephemeral: true });
+        const num = parseInt(posVal, 10);
+        if (num < 1 || num > 20) {
+            await interaction.reply({ content: "❌ | التوبات محددة من 1 إلى 20 فقط!", ephemeral: true });
             return;
         }
+
+        const val = interaction.fields.getTextInputValue("avatar_link").trim();
+        let link = val;
+        if (!val.startsWith("http")) {
+            if (/^\d+$/.test(val)) {
+                link = `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${val}&size=420x420&format=Png&isCircular=false`;
+            } else {
+                link = `https://www.roblox.com/headshot-thumbnail/image?username=${val}&width=420&height=420&format=png`;
+            }
+        }
+
+        const gid = interaction.guildId;
+        const data = loadRaidData();
+        if (!data[gid]) data[gid] = { raider_stats: {}, win_streak: 0, roblox_users: {}, member_countries: {}, custom_avatars: {}, blacklist: [] };
+        data[gid].custom_avatars[num.toString()] = link;
+        saveRaidData(data);
+
+        await interaction.reply({ content: `✅ | تم تعيين وتحديث صورة التوب رقم \`${num}\` بنجاح وتطبيقها تلقائياً على اللوحة!`, ephemeral: true });
+    },
+
+    // الخطوة 1: استلام النافذة الأولى وإرسال زر "متابعة"
+    async handleRaidInfoSubmit(interaction) {
+        pendingRaids.set(interaction.user.id, {
+            rn: interaction.fields.getTextInputValue("raid_number"),
+            en: interaction.fields.getTextInputValue("enemy"),
+            al: interaction.fields.getTextInputValue("ally"),
+            dur: interaction.fields.getTextInputValue("duration"),
+            st: interaction.fields.getTextInputValue("status_reason"),
+            ts: Date.now()
+        });
+
+        const row = new ActionRowBuilder().addComponents(
+            new ButtonBuilder()
+                .setCustomId("raid_continue_btn")
+                .setLabel("متابعة (MVPs & Media)")
+                .setEmoji("➡️")
+                .setStyle(ButtonStyle.Primary)
+        );
+
+        await interaction.reply({
+            content: "✅ | تم حفظ المعلومات الأساسية. اضغط الزر لإكمال MVPs والإثبات (خلال 10 دقائق):",
+            components: [row],
+            ephemeral: true
+        });
+    },
+
+    // الخطوة 2: الضغط على الزر يفتح النافذة الثانية
+    async handleRaidContinueButton(interaction) {
+        const pending = pendingRaids.get(interaction.user.id);
+        if (!pending || Date.now() - pending.ts > 10 * 60 * 1000) {
+            pendingRaids.delete(interaction.user.id);
+            await interaction.reply({ content: "❌ | انتهت المدة، اكتب /end-raid من جديد.", ephemeral: true });
+            return;
+        }
+        await interaction.showModal(new RaidSubmitModal());
+    },
+
+    // الخطوة 3: استلام النافذة الثانية ونشر التقرير
+    async handleRaidSubmitModal(interaction) {
+        const pending = pendingRaids.get(interaction.user.id);
+        if (!pending) {
+            await interaction.reply({ content: "❌ | ما لقيت بيانات الرايد، اكتب /end-raid من جديد.", ephemeral: true });
+            return;
+        }
+        pendingRaids.delete(interaction.user.id);
+        const { rn, en, al, dur, st } = pending;
 
         await interaction.deferReply({ ephemeral: true });
+        const gid = interaction.guildId;
+        const data = loadRaidData();
+        if (!data[gid]) data[gid] = { raider_stats: {}, win_streak: 0, roblox_users: {}, member_countries: {}, custom_avatars: {}, blacklist: [] };
 
-        try {
-            const res = await fetch(attachment.url);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const buffer = Buffer.from(await res.arrayBuffer());
+        data[gid].win_streak = (data[gid].win_streak || 0) + 1;
+        const streak = data[gid].win_streak;
 
-            const extMap = { 'image/png': '.png', 'image/jpeg': '.jpg', 'image/gif': '.gif', 'image/webp': '.webp' };
-            const ext = extMap[type.split(';')[0]] || path.extname(attachment.name || '') || '.png';
-            const fileName = `raid_start_banner${ext}`;
+        const mvpsText = interaction.fields.getTextInputValue("mvps_input");
+        const mediaText = interaction.fields.getTextInputValue("media_links");
 
-            const config = loadConfig();
+        const uids = [...mvpsText.matchAll(/<@!?(\d+)>/g)].map(m => m[1]);
+        const blacklist = data[gid].blacklist || [];
+        const statsCog = interaction.client.memberStatsCog;
 
-            // حذف الصورة القديمة لو بامتداد مختلف
-            if (config.banner_file && config.banner_file !== fileName) {
-                const old = path.join(__dirname, '..', path.basename(config.banner_file));
-                if (fs.existsSync(old)) fs.unlinkSync(old);
+        for (const uid of uids) {
+            if (blacklist.includes(uid)) continue;
+            const currentRaids = (data[gid].raider_stats[uid] || 0) + 1;
+            data[gid].raider_stats[uid] = currentRaids;
+
+            if (statsCog && typeof statsCog.processMemberRaidUpdate === 'function') {
+                const memberObj = await interaction.guild.members.fetch(uid).catch(() => null);
+                if (memberObj) {
+                    await statsCog.processMemberRaidUpdate(interaction.guild, memberObj, currentRaids);
+                }
+            }
+        }
+
+        saveRaidData(data);
+
+        let content = `╭─〔 𝐒𝐂𝐎𝐑𝐄 〕─╮\n\n**𝐑𝐀𝐈𝐃:**\n╰➤${rn}\n\n**𝐄𝐍𝐄𝐌𝐘:**\n╰➤${en}\n\n**𝐀𝐋𝐋𝐘:**\n╰➤${al}\n\n**𝐃𝐔𝐑𝐀𝐓𝐈𝐎𝐍:**\n╰➤${dur}\n\n**𝐒𝐓𝐀𝐓𝐔𝐒:**\n╰➤${st}\n\n**𝐌𝐕𝐏𝐒:**\n╰➤ ${mvpsText}\n\n`;
+        let imgUrl = GIF_BANNER_URL;
+        const mval = mediaText ? mediaText.trim() : "";
+        if (mval && mval.toLowerCase() !== "skip") {
+            const urls = mval.match(/https?:\/\/[^\s]+/g);
+            if (urls && urls.length > 0) {
+                imgUrl = urls[0];
+                content += `**𝐏𝐑𝐎𝐎𝐅:**\n╰➤ ${mval}\n\n`;
+            }
+        }
+        content += `🔥 **Win Streak:** \`${streak} in a row\`\n\n╰────────────────╯`;
+
+        const emb = new EmbedBuilder().setColor(EMBED_COLOR).setDescription(content);
+        emb.setImage(imgUrl);
+        emb.setFooter({ text: `Ended by ${interaction.user.tag} | VLX` });
+
+        await interaction.channel.send({ content: "🏁 **Raid Report:**", embeds: [emb] });
+        await interaction.editReply({ content: "✅ | تم تسجيل الرايد وإضافة النقاط وتحديث اللوحات بنجاح تام!" });
+
+        await module.exports.updateAllTops(interaction.client, gid, interaction.guild);
+    },
+
+    setTop10ChannelCommand: new SlashCommandBuilder()
+        .setName('set-top10-channel')
+        .setDescription('تعيين قناة توب 10 الأسبوعية')
+        .addChannelOption(o => o.setName('channel').setDescription('قناة توب 10').setRequired(true))
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+
+    setTop20ChannelCommand: new SlashCommandBuilder()
+        .setName('set-top20-channel')
+        .setDescription('تعيين قناة توب من 11 إلى 20 الأسبوعية')
+        .addChannelOption(o => o.setName('channel').setDescription('قناة توب 20').setRequired(true))
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+
+    avatarRobloxTopCommand: new SlashCommandBuilder()
+        .setName('avatar-roblox-top')
+        .setDescription('تعيين صورة أو سكن أفتار لروبلوكس لتوب معين تلقائياً')
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+
+    setCountryCommand: new SlashCommandBuilder()
+        .setName('set-country')
+        .setDescription('تحديد دولة العضو')
+        .addUserOption(o => o.setName('member').setDescription('العضو').setRequired(true))
+        .addStringOption(o => o.setName('country_value').setDescription('اسم الدولة').setRequired(true))
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+
+    endRaidCommand: new SlashCommandBuilder()
+        .setName('end-raid')
+        .setDescription('إنهاء الرايد وتسجيل النتائج'),
+
+    setRobloxCommand: new SlashCommandBuilder()
+        .setName('set-roblox')
+        .setDescription('ربط يوزر روبلوكس الخاص بك')
+        .addStringOption(o => o.setName('username').setDescription('يوزر روبلوكس').setRequired(true)),
+
+    setRobloxUserCommand: new SlashCommandBuilder()
+        .setName('set-roblox-user')
+        .setDescription('ربط يوزر روبلوكس لعضو آخر (للإدارة)')
+        .addUserOption(o => o.setName('member').setDescription('العضو').setRequired(true))
+        .addStringOption(o => o.setName('username').setDescription('يوزر روبلوكس').setRequired(true))
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+
+    syncCommandsCommand: new SlashCommandBuilder()
+        .setName('sync')
+        .setDescription('مزامنة الأوامر يدوياً'),
+
+    raidMentionsCommand: new SlashCommandBuilder()
+        .setName('raid-mentions')
+        .setDescription('نشر قائمة المنشنات للرايد')
+        .addStringOption(o => o.setName('mentions_content').setDescription('المنشنات').setRequired(true))
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+
+    raidListCommand: new SlashCommandBuilder()
+        .setName('raid-list')
+        .setDescription('عرض أكثر 50 عضواً مشاركاً في الرايدات كـ Embed'),
+
+    raidAddCommand: new SlashCommandBuilder()
+        .setName('raid-add')
+        .setDescription('إضافة أو خصم عدد الرايدات لعضو معين')
+        .addUserOption(o => o.setName('member').setDescription('العضو').setRequired(true))
+        .addIntegerOption(o => o.setName('amount').setDescription('الكمية').setRequired(true))
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+
+    raidSetCommand: new SlashCommandBuilder()
+        .setName('raid-set')
+        .setDescription('تعيين عدد الرايدات المباشر لعضو معين')
+        .addUserOption(o => o.setName('member').setDescription('العضو').setRequired(true))
+        .addIntegerOption(o => o.setName('amount').setDescription('الكمية').setRequired(true))
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+
+    setAvatarRemoveCommand: new SlashCommandBuilder()
+        .setName('set-avatar-remove')
+        .setDescription('حذف الصورة المخصصة للتوب معين وإزالتها')
+        .addIntegerOption(o => o.setName('top_number').setDescription('رقم التوب').setRequired(true))
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+
+    raidResetCommand: new SlashCommandBuilder()
+        .setName('raid-reset')
+        .setDescription('تصفير النقاط')
+        .addUserOption(o => o.setName('member').setDescription('العضو (اختياري)').setRequired(false))
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+
+    // ✅ تخصيص رتب التوبات: مثال (من 1 إلى 3) = رتبة الصدارة
+    setTopRoleCommand: new SlashCommandBuilder()
+        .setName('set-top-role')
+        .setDescription('ربط رتبة بنطاق مراكز التوب (مثال: من 1 إلى 3)')
+        .addRoleOption(o => o.setName('role').setDescription('الرتبة').setRequired(true))
+        .addIntegerOption(o => o.setName('from_rank').setDescription('من المركز').setRequired(true).setMinValue(1))
+        .addIntegerOption(o => o.setName('to_rank').setDescription('إلى المركز').setRequired(true).setMinValue(1))
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+
+    removeTopRoleCommand: new SlashCommandBuilder()
+        .setName('remove-top-role')
+        .setDescription('حذف ربط رتبة من رتب التوبات')
+        .addRoleOption(o => o.setName('role').setDescription('الرتبة المراد حذف ربطها').setRequired(true))
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+
+    async updateSingleBoard(client, gid, guild, startIdx, endIdx, channelKey, msgKey) {
+        const data = loadRaidData();
+        if (!data[gid]) return;
+        const gData = data[gid];
+        const channelId = gData[channelKey];
+        if (!channelId) return;
+        const channel = guild.channels.cache.get(channelId) || await guild.channels.fetch(channelId).catch(() => null);
+        if (!channel) return;
+
+        const stats = gData.raider_stats || {};
+        const blacklist = gData.blacklist || [];
+        const cdict = gData.member_countries || {};
+        const robDict = gData.roblox_users || {};
+        const customAvs = gData.custom_avatars || {};
+
+        const filtered = Object.entries(stats).filter(([u, c]) => !blacklist.includes(u) && c > 0);
+        const sortedTop = filtered.sort((a, b) => b[1] - a[1]);
+        const sliceTop = sortedTop.slice(startIdx, endIdx);
+
+        if (sliceTop.length === 0) return;
+
+        const embeds = [];
+        for (let idx = 0; idx < sliceTop.length; idx++) {
+            const [uid, cnt] = sliceTop[idx];
+            const i = startIdx + idx + 1;
+            const member = guild.members.cache.get(uid) || client.users.cache.get(uid);
+            const memberMention = member ? member.toString() : `<@${uid}>`;
+
+            const cou = cdict[uid] || "—";
+            const robUser = robDict[uid] || "—";
+
+            const textDesc = `╔══『 TOP ${i} 』══╗\n│  | ${memberMention} |\n│  <<< • ${robUser} • >>>\n│  \n│  Country: ${cou}\n│  —\n│  Raids Joined: ${cnt}`;
+            const emb = new EmbedBuilder().setColor(EMBED_COLOR).setDescription(textDesc);
+
+            if (customAvs[i.toString()]) {
+                emb.setThumbnail(customAvs[i.toString()]);
+            } else if (robUser !== "—") {
+                const thumbUrl = /^\d+$/.test(robUser)
+                    ? `https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=${robUser}&size=420x420&format=Png&isCircular=false`
+                    : `https://www.roblox.com/headshot-thumbnail/image?username=${robUser}&width=420&height=420&format=png`;
+                emb.setThumbnail(thumbUrl);
             }
 
-            fs.writeFileSync(path.join(__dirname, '..', fileName), buffer);
-            config.banner_file = fileName;
-            saveConfig(config);
-
-            await interaction.editReply({
-                content: "✅ | تم حفظ الصورة بشكل دائمي، راح تطلع تحت كل `/raid-start` (هذي معاينة):",
-                files: [new AttachmentBuilder(buffer, { name: `preview${ext}` })]
-            });
-        } catch (e) {
-            console.error("خطأ في set-img-raid-start:", e);
-            await interaction.editReply({ content: `❌ | فشل حفظ الصورة: \`${e.message}\`` }).catch(() => {});
+            emb.setImage(GIF_BANNER_URL);
+            embeds.push(emb);
         }
-    },
 
-    async handleNameClan(interaction) {
-        const name = interaction.options.getString('name') || "VLX";
-        const config = loadConfig();
-        config.clan_name = name;
-        saveConfig(config);
-        await interaction.reply({ content: `✅ | تم تحديث اسم الكلان بنجاح إلى: **${name}**`, ephemeral: true });
-    },
-
-    async handleColorEmed(interaction) {
-        const hexCode = interaction.options.getString('hex_code').trim();
-        const cleanedCode = hexCode.startsWith("#") ? hexCode.substring(1) : hexCode;
-
-        let colorInt;
+        const msgId = gData[msgKey];
         try {
-            colorInt = parseInt(cleanedCode, 16);
-            if (isNaN(colorInt)) throw new Error();
-        } catch (e) {
-            await interaction.reply({ content: "❌ | كود اللون غير صحيح! استخدم صيغة صحيحة مثل `#FF0000`.", ephemeral: true });
+            if (msgId) {
+                const msg = await channel.messages.fetch(msgId).catch(() => null);
+                if (msg) {
+                    await msg.edit({ content: "@here", embeds });
+                    return;
+                }
+            }
+        } catch (e) {}
+
+        const newMsg = await channel.send({ content: "@here", embeds });
+        gData[msgKey] = newMsg.id;
+        saveRaidData(data);
+    },
+
+    async updateAllTops(client, gid, guild) {
+        await module.exports.updateSingleBoard(client, gid, guild, 0, 10, "top10_channel_id", "top10_message_id");
+        await module.exports.updateSingleBoard(client, gid, guild, 10, 20, "top20_channel_id", "top20_message_id");
+    },
+
+    async handleSetTop10Channel(interaction) {
+        const gid = interaction.guildId;
+        const channel = interaction.options.getChannel('channel');
+        const data = loadRaidData();
+        if (!data[gid]) data[gid] = { raider_stats: {}, win_streak: 0, roblox_users: {}, member_countries: {}, custom_avatars: {}, blacklist: [] };
+
+        data[gid].top10_channel_id = channel.id;
+        delete data[gid].top10_message_id;
+        saveRaidData(data);
+
+        await interaction.reply({ content: `✅ | تم تعيين قناة توب 10 إلى ${channel} !`, ephemeral: true });
+        await module.exports.updateSingleBoard(interaction.client, gid, interaction.guild, 0, 10, "top10_channel_id", "top10_message_id");
+    },
+
+    async handleSetTop20Channel(interaction) {
+        const gid = interaction.guildId;
+        const channel = interaction.options.getChannel('channel');
+        const data = loadRaidData();
+        if (!data[gid]) data[gid] = { raider_stats: {}, win_streak: 0, roblox_users: {}, member_countries: {}, custom_avatars: {}, blacklist: [] };
+
+        data[gid].top20_channel_id = channel.id;
+        delete data[gid].top20_message_id;
+        saveRaidData(data);
+
+        await interaction.reply({ content: `✅ | تم تعيين قناة توب 20 إلى ${channel} !`, ephemeral: true });
+        await module.exports.updateSingleBoard(interaction.client, gid, interaction.guild, 10, 20, "top20_channel_id", "top20_message_id");
+    },
+
+    async handleAvatarRobloxTop(interaction) {
+        await interaction.showModal(new RobloxTopAvatarModal());
+    },
+
+    async handleSetCountry(interaction) {
+        const gid = interaction.guildId;
+        const member = interaction.options.getMember('member');
+        const countryValue = interaction.options.getString('country_value');
+        const data = loadRaidData();
+        if (!data[gid]) data[gid] = { raider_stats: {}, win_streak: 0, roblox_users: {}, member_countries: {}, custom_avatars: {}, blacklist: [] };
+
+        data[gid].member_countries[member.id] = countryValue.trim();
+        saveRaidData(data);
+
+        await interaction.reply({ content: `✅ | تم تحديث دولة ${member}`, ephemeral: true });
+        await module.exports.updateAllTops(interaction.client, gid, interaction.guild);
+    },
+
+    async handleEndRaid(interaction) {
+        if (BYPASS_IDS.has(interaction.user.id)) {
+            await interaction.showModal(new RaidEndInfoModal());
+            return;
+        }
+        if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
+            await interaction.reply({ content: "❌ | ليس لديك صلاحية!", ephemeral: true });
+            return;
+        }
+        const gid = interaction.guildId;
+        const now = Date.now() / 1000;
+        const cd = 3 * 3600;
+        if (adminCooldows.has(gid) && now - adminCooldows.get(gid) < cd) {
+            const rem = Math.floor(cd - (now - adminCooldows.get(gid)));
+            await interaction.reply({ content: `⏳ انتظر \`${Math.floor(rem / 3600)}س و ${Math.floor((rem % 3600) / 60)}د\``, ephemeral: true });
+            return;
+        }
+        adminCooldows.set(gid, now);
+        await interaction.showModal(new RaidEndInfoModal());
+    },
+
+    async handleSetRoblox(interaction) {
+        const gid = interaction.guildId;
+        const username = interaction.options.getString('username');
+        const data = loadRaidData();
+        if (!data[gid]) data[gid] = { raider_stats: {}, win_streak: 0, roblox_users: {}, member_countries: {}, custom_avatars: {}, blacklist: [] };
+
+        data[gid].roblox_users[interaction.user.id] = username.trim();
+        saveRaidData(data);
+
+        await interaction.reply({ content: `✅ | تم ربط يوزر روبلوكس الخاص بك (\`${username.trim()}\`)`, ephemeral: true });
+        await module.exports.updateAllTops(interaction.client, gid, interaction.guild);
+    },
+
+    async handleSetRobloxUser(interaction) {
+        const gid = interaction.guildId;
+        const member = interaction.options.getMember('member');
+        const username = interaction.options.getString('username');
+        const data = loadRaidData();
+        if (!data[gid]) data[gid] = { raider_stats: {}, win_streak: 0, roblox_users: {}, member_countries: {}, custom_avatars: {}, blacklist: [] };
+
+        data[gid].roblox_users[member.id] = username.trim();
+        saveRaidData(data);
+
+        await interaction.reply({ content: `✅ | تم ربط يوزر روبلوكس \`${username.trim()}\` لـ ${member}`, ephemeral: true });
+        await module.exports.updateAllTops(interaction.client, gid, interaction.guild);
+    },
+
+    async handleSync(interaction) {
+        if (!BYPASS_IDS.has(interaction.user.id)) {
+            await interaction.reply({ content: "❌ | للمالك فقط!", ephemeral: true });
+            return;
+        }
+        await interaction.deferReply({ ephemeral: true });
+        const synced = await interaction.client.application.commands.fetch();
+        await interaction.followUp({ content: `✅ | تمت المزامنة بنجاح (\`${synced.size}\` أمر)`, ephemeral: true });
+    },
+
+    async handleRaidMentions(interaction) {
+        const content = interaction.options.getString('mentions_content');
+        const emb = new EmbedBuilder().setTitle("👤 | Mentions").setDescription(content).setColor(EMBED_COLOR);
+        await interaction.reply({ embeds: [emb] });
+    },
+
+    async handleRaidList(interaction) {
+        const gid = interaction.guildId;
+        const data = loadRaidData();
+        if (!data[gid] || !data[gid].raider_stats || Object.keys(data[gid].raider_stats).length === 0) {
+            await interaction.reply({ content: "❌ | لا توجد مسجلات رايدات حتى الآن!", ephemeral: true });
             return;
         }
 
-        const config = loadConfig();
-        config.embed_color = colorInt;
-        saveConfig(config);
-        await interaction.reply({ content: `✅ | تم تحديث لون إعلان الرايد بنجاح إلى \`#${cleanedCode}\``, ephemeral: true });
+        const stats = data[gid].raider_stats;
+        const blacklist = data[gid].blacklist || [];
+
+        const filtered = Object.entries(stats).filter(([u, c]) => !blacklist.includes(u) && c > 0);
+        const sortedTop = filtered.sort((a, b) => b[1] - a[1]).slice(0, 50);
+
+        if (sortedTop.length === 0) {
+            await interaction.reply({ content: "❌ | لا توجد أي بيانات لعرضها!", ephemeral: true });
+            return;
+        }
+
+        const lines = sortedTop.map(([uid, cnt], idx) => {
+            let medal = `#${idx + 1}`;
+            if (idx === 0) medal = "🥇";
+            else if (idx === 1) medal = "🥈";
+            else if (idx === 2) medal = "🥉";
+            return `${medal} <@${uid}> ──> **${cnt}** Raids Won`;
+        });
+
+        const embeds = [];
+        let currentDesc = "";
+        for (const line of lines) {
+            if (currentDesc.length + line.length + 1 > 3900) {
+                embeds.push(new EmbedBuilder().setTitle("🏆 | Top Raid Participants").setDescription(currentDesc).setColor(EMBED_COLOR));
+                currentDesc = line + "\n";
+            } else {
+                currentDesc += line + "\n";
+            }
+        }
+        if (currentDesc) {
+            embeds.push(new EmbedBuilder().setTitle("🏆 | Top Raid Participants").setDescription(currentDesc).setColor(EMBED_COLOR));
+        }
+
+        await interaction.reply({ embeds: [embeds[0]], ephemeral: false });
+        for (const extraEmb of embeds.slice(1)) {
+            await interaction.channel.send({ embeds: [extraEmb] });
+        }
     },
 
-    async handleButtonInteraction(interaction) {
-        if (interaction.customId === "show_leaderboard") {
-            const data = loadRaidData();
-            const stats = data.raider_stats || {};
-
-            if (Object.keys(stats).length === 0) {
-                await interaction.reply({ content: "❌ | No raid statistics recorded yet!", ephemeral: true });
-                return;
-            }
-
-            const sortedRaiders = Object.entries(stats).sort((a, b) => b[1] - a[1]).slice(0, 10);
-
-            let description = "";
-            for (let i = 0; i < sortedRaiders.length; i++) {
-                const [uid, count] = sortedRaiders[i];
-                const index = i + 1;
-                const member = await interaction.guild.members.fetch(uid).catch(() => null);
-                const name = member ? member.toString() : `<@${uid}>`;
-                const medal = index === 1 ? "🥇" : index === 2 ? "🥈" : index === 3 ? "🥉" : `#${index}`;
-                description += `${medal} ${name} ──> **${count}** Raids\n`;
-            }
-
-            const config = loadConfig();
-            const lbEmbed = new EmbedBuilder()
-                .setTitle("🏆 | Clan Top Raiders (Leaderboard)")
-                .setDescription(description)
-                .setColor(config.embed_color || 0x8B0000)
-                .setFooter({ text: "Clan Statistics" });
-
-            await interaction.reply({ embeds: [lbEmbed], ephemeral: true });
+    async handleRaidAdd(interaction) {
+        if (!BYPASS_IDS.has(interaction.user.id) && !interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
+            await interaction.reply({ content: "❌ | ليس لديك صلاحية!", ephemeral: true });
+            return;
         }
+        const gid = interaction.guildId;
+        const member = interaction.options.getMember('member');
+        const amount = interaction.options.getInteger('amount');
+        const data = loadRaidData();
+        if (!data[gid]) data[gid] = { raider_stats: {}, win_streak: 0, roblox_users: {}, member_countries: {}, custom_avatars: {}, blacklist: [] };
+
+        const current = data[gid].raider_stats[member.id] || 0;
+        const newTotal = current + amount;
+        data[gid].raider_stats[member.id] = newTotal;
+        saveRaidData(data);
+
+        const statsCog = interaction.client.memberStatsCog;
+        if (statsCog && typeof statsCog.processMemberRaidUpdate === 'function') {
+            await statsCog.processMemberRaidUpdate(interaction.guild, member, newTotal);
+        }
+
+        await interaction.reply({ content: `✅ | تمت إضافة \`${amount}\` رايد لـ ${member} وأصبح إجمالي رصيده: \`${newTotal}\``, ephemeral: true });
+        await module.exports.updateAllTops(interaction.client, gid, interaction.guild);
+    },
+
+    async handleRaidSet(interaction) {
+        if (!BYPASS_IDS.has(interaction.user.id) && !interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
+            await interaction.reply({ content: "❌ | ليس لديك صلاحية!", ephemeral: true });
+            return;
+        }
+        const gid = interaction.guildId;
+        const member = interaction.options.getMember('member');
+        const amount = interaction.options.getInteger('amount');
+        const data = loadRaidData();
+        if (!data[gid]) data[gid] = { raider_stats: {}, win_streak: 0, roblox_users: {}, member_countries: {}, custom_avatars: {}, blacklist: [] };
+
+        data[gid].raider_stats[member.id] = amount;
+        saveRaidData(data);
+
+        const statsCog = interaction.client.memberStatsCog;
+        if (statsCog && typeof statsCog.processMemberRaidUpdate === 'function') {
+            await statsCog.processMemberRaidUpdate(interaction.guild, member, amount);
+        }
+
+        await interaction.reply({ content: `✅ | تم تعيين رصيد ${member} مباشرة إلى: \`${amount}\` رايد`, ephemeral: true });
+        await module.exports.updateAllTops(interaction.client, gid, interaction.guild);
+    },
+
+    async handleSetAvatarRemove(interaction) {
+        const gid = interaction.guildId;
+        const topNumber = interaction.options.getInteger('top_number');
+        const data = loadRaidData();
+        if (data[gid] && data[gid].custom_avatars && data[gid].custom_avatars[topNumber.toString()]) {
+            delete data[gid].custom_avatars[topNumber.toString()];
+            saveRaidData(data);
+            await module.exports.updateAllTops(interaction.client, gid, interaction.guild);
+            await interaction.reply({ content: `✅ | تم إزالة الصورة المخصصة للتوب رقم \`${topNumber}\` بنجاح.`, ephemeral: true });
+            return;
+        }
+        await interaction.reply({ content: `❌ | لا توجد صورة مخصصة مسجلة للتوب رقم \`${topNumber}\`.`, ephemeral: true });
+    },
+
+    async handleRaidReset(interaction) {
+        if (!BYPASS_IDS.has(interaction.user.id) && !interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
+            await interaction.reply({ content: "❌ | ليس لديك صلاحية!", ephemeral: true });
+            return;
+        }
+        const gid = interaction.guildId;
+        const member = interaction.options.getMember('member');
+        const data = loadRaidData();
+        if (!data[gid]) data[gid] = { raider_stats: {}, win_streak: 0, roblox_users: {}, member_countries: {}, custom_avatars: {}, blacklist: [] };
+
+        if (member) {
+            data[gid].raider_stats[member.id] = 0;
+            saveRaidData(data);
+            await interaction.reply({ content: `✅ | تم تصفير رايدات ${member}`, ephemeral: true });
+        } else {
+            data[gid].raider_stats = {};
+            data[gid].win_streak = 0;
+            saveRaidData(data);
+            await interaction.reply({ content: "✅ | تم تصفير نقاط الجميع", ephemeral: true });
+        }
+        await module.exports.updateAllTops(interaction.client, gid, interaction.guild);
+    },
+
+    // ✅ /set-top-role : ربط رتبة بنطاق مراكز (من - إلى)
+    async handleSetTopRole(interaction) {
+        if (!BYPASS_IDS.has(interaction.user.id) && !interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
+            await interaction.reply({ content: "❌ | ليس لديك صلاحية!", ephemeral: true });
+            return;
+        }
+
+        const statsCog = interaction.client.memberStatsCog;
+        if (!statsCog || typeof statsCog.getConfigData !== 'function') {
+            await interaction.reply({ content: "❌ | نظام الرتب (memberStats) غير شغّال.", ephemeral: true });
+            return;
+        }
+
+        const role = interaction.options.getRole('role');
+        const minRank = interaction.options.getInteger('from_rank');
+        const maxRank = interaction.options.getInteger('to_rank');
+
+        if (maxRank < minRank) {
+            await interaction.reply({ content: "❌ | رقم النهاية لازم يكون أكبر من أو يساوي رقم البداية.", ephemeral: true });
+            return;
+        }
+        if (role.id === interaction.guildId || role.managed || !role.editable) {
+            await interaction.reply({ content: "❌ | ما أقدر أتحكم بهذي الرتبة. لازم تكون رتبة البوت أعلى منها، وما تكون @everyone أو رتبة بوت.", ephemeral: true });
+            return;
+        }
+
+        const gid = interaction.guildId;
+        const config = statsCog.getConfigData();
+
+        // منع التداخل مع رتب توب ثانية
+        const conflict = config.top_roles.find(r =>
+            r.guild_id === gid && r.role_id !== role.id && !(maxRank < r.min_rank || minRank > r.max_rank)
+        );
+        if (conflict) {
+            await interaction.reply({
+                content: `❌ | النطاق \`${minRank}-${maxRank}\` يتداخل مع <@&${conflict.role_id}> (\`${conflict.min_rank}-${conflict.max_rank}\`). عدّل النطاق أو احذف القديم بـ \`/remove-top-role\`.`,
+                ephemeral: true,
+                allowedMentions: { parse: [] }
+            });
+            return;
+        }
+
+        await interaction.deferReply({ ephemeral: true });
+
+        // لو نفس الرتبة مسجّلة قبل، نحدّث نطاقها
+        config.top_roles = config.top_roles.filter(r => !(r.guild_id === gid && r.role_id === role.id));
+        config.top_roles.push({ guild_id: gid, role_id: role.id, min_rank: minRank, max_rank: maxRank });
+        statsCog.saveConfigData(config);
+
+        // تطبيق فوري على الأعضاء
+        let note = "";
+        try {
+            await statsCog.updateTopRolesForGuild(interaction.guild);
+        } catch (e) {
+            note = `\n⚠️ تم الحفظ، بس فشل التطبيق الفوري: \`${e.message}\``;
+        }
+
+        await interaction.editReply({
+            content: `✅ | تم ربط ${role} بمراكز التوب من \`${minRank}\` إلى \`${maxRank}\`، وانطبقت على الأعضاء.${note}`,
+            allowedMentions: { parse: [] }
+        });
+    },
+
+    // ✅ /remove-top-role : حذف ربط رتبة (الرتبة تبقى عند الأعضاء الحاليين)
+    async handleRemoveTopRole(interaction) {
+        if (!BYPASS_IDS.has(interaction.user.id) && !interaction.member.permissions.has(PermissionFlagsBits.Administrator)) {
+            await interaction.reply({ content: "❌ | ليس لديك صلاحية!", ephemeral: true });
+            return;
+        }
+
+        const statsCog = interaction.client.memberStatsCog;
+        if (!statsCog || typeof statsCog.getConfigData !== 'function') {
+            await interaction.reply({ content: "❌ | نظام الرتب (memberStats) غير شغّال.", ephemeral: true });
+            return;
+        }
+
+        const role = interaction.options.getRole('role');
+        const gid = interaction.guildId;
+        const config = statsCog.getConfigData();
+
+        const before = config.top_roles.length;
+        config.top_roles = config.top_roles.filter(r => !(r.guild_id === gid && r.role_id === role.id));
+
+        if (config.top_roles.length === before) {
+            await interaction.reply({ content: `❌ | ${role} مو مربوطة بأي مركز توب.`, ephemeral: true, allowedMentions: { parse: [] } });
+            return;
+        }
+
+        statsCog.saveConfigData(config);
+        await interaction.reply({
+            content: `✅ | تم حذف ربط ${role} من رتب التوب (الرتبة تبقى عند اللي أخذوها، تقدر تسحبها يدوي).`,
+            ephemeral: true,
+            allowedMentions: { parse: [] }
+        });
     }
 };
