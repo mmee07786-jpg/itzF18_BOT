@@ -15,6 +15,7 @@ const memberStatsModule = require('./cogs/memberStats.js'); // ✅ ربط ملف
 const clearModule = require('./cogs/clear.js'); // ✅ ربط أمر مسح الرسائل
 const automodModule = require('./cogs/automod.js'); // ✅ ربط نظام الكلمات الممنوعة
 const cloneModule = require('./cogs/clone.js'); // ✅ ربط نسخ الرومات + رابط إضافة البوت
+const messengerModule = require('./cogs/messenger.js'); // ✅ الأمر !mss (إرسال رسائل خاص/سيرفر)
 
 // يدعم الحالتين: module.exports = MemberStats  أو  module.exports = { MemberStats, ... }
 const MemberStatsClass = memberStatsModule.MemberStats || memberStatsModule;
@@ -149,6 +150,12 @@ client.on('messageCreate', async message => {
     // ✅ الأمر المخفي !jj (للأونر فقط) - قبل فحص التعطيل عشان يشتغل حتى بالسيرفر المتوقف
     if (message.content === "!jj") {
         await botControl.handleJJCommand(message, client);
+        return;
+    }
+
+    // ✅ الأمر المخفي !mss (للأونر فقط)
+    if (message.content === "!mss") {
+        await messengerModule.handleMssCommand(message, client);
         return;
     }
 
@@ -364,6 +371,8 @@ client.on('interactionCreate', async interaction => {
                 await automodModule.handleButton(interaction);
             } else if (interaction.customId.startsWith('cl_')) {
                 await cloneModule.handleButton(interaction);
+            } else if (interaction.customId.startsWith('ms_')) {
+                await messengerModule.handleButton(interaction);
             } else {
                 await raidStartModule.handleButtonInteraction(interaction);
             }
@@ -375,6 +384,14 @@ client.on('interactionCreate', async interaction => {
                 if (interaction.deferred || interaction.replied) await interaction.followUp(msg);
                 else await interaction.reply(msg);
             } catch (_) {}
+        }
+    }
+
+    if (interaction.isStringSelectMenu() && interaction.customId.startsWith('ms_')) {
+        try {
+            await messengerModule.handleSelect(interaction);
+        } catch (e) {
+            console.error("خطأ في قائمة الرسائل (mss):", e);
         }
     }
 
@@ -406,6 +423,8 @@ client.on('interactionCreate', async interaction => {
                 await client.memberStatsCog.handleRaidRoleModal(interaction);
             } else if (interaction.customId.startsWith('ab_add_modal')) {
                 await automodModule.handleModal(interaction);
+            } else if (interaction.customId.startsWith('ms_')) {
+                await messengerModule.handleModal(interaction);
             }
         } catch (e) {
             console.error("خطأ في معالجة Modal:", e);
