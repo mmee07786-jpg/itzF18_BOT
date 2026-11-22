@@ -95,7 +95,7 @@ client.once('ready', async () => {
 
     // ✅ تسجيل أوامر memberStats تلقائياً (مثل set-raid-role) لو الملف يصدّرها
     try {
-        for (const mod of [memberStatsModule, automodModule, raidStartModule, cloneModule]) {
+        for (const mod of [memberStatsModule, automodModule, raidStartModule, cloneModule, { setTop: raidEndModule.setTopRoleCommand, removeTop: raidEndModule.removeTopRoleCommand }]) {
             for (const val of Object.values(mod)) {
                 if (val && typeof val === 'object' && typeof val.toJSON === 'function' && val.name) {
                     await client.application.commands.create(val.toJSON());
@@ -271,6 +271,10 @@ client.on('interactionCreate', async interaction => {
                 await raidEndModule.handleSetAvatarRemove(interaction);
             } else if (interaction.commandName === 'raid-reset') {
                 await raidEndModule.handleRaidReset(interaction);
+            } else if (interaction.commandName === 'set-top-role') {
+                await raidEndModule.handleSetTopRole(interaction);
+            } else if (interaction.commandName === 'remove-top-role') {
+                await raidEndModule.handleRemoveTopRole(interaction);
             }
             // ✅ أوامر الرتب والإحصائيات (memberStats)
             else if (interaction.commandName === 'set-raid-role') {
