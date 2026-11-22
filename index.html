@@ -1,234 +1,376 @@
-import discord
-from discord.ext import commands
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import HTMLResponse
-import uvicorn
-import json
-import os
-import asyncio
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ItzF18 Bot - لوحة التحكم</title>
+<style>
+:root{
+  --bg:#0a0c11; --surface:#11141b; --surface2:#171b24; --border:#1f2531;
+  --text:#eef0f4; --muted:#9aa1b0; --primary:#5865F2; --primary-h:#4752c4;
+  --green:#3ba55d; --red:#ed4245; --orange:#faa61a;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Segoe UI",Tahoma,Arial,sans-serif}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer}
 
-app = FastAPI()
-intents = discord.Intents.default()
-intents.members = True
-bot = commands.Bot(command_prefix="!", intents=intents)
+/* الشريط العلوي */
+nav{position:sticky;top:0;z-index:20;background:rgba(10,12,17,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+.nav-in{max-width:1000px;margin:auto;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{font-weight:800;font-size:18px;color:#fff;display:flex;align-items:center;gap:8px}
+.logo b{color:var(--primary)}
+.links{display:flex;gap:4px;flex:1;flex-wrap:wrap}
+.links a{padding:7px 12px;border-radius:8px;color:var(--muted);font-size:14px;font-weight:600}
+.links a:hover,.links a.active{background:var(--surface2);color:#fff}
+.nav-r{display:flex;gap:8px;align-items:center}
 
-SETTINGS_FILE = "server_settings.json"
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 16px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:#fff;font-size:14px;font-weight:700;transition:.15s}
+.btn:hover{background:#202533}
+.btn.primary{background:var(--primary);border-color:var(--primary)}
+.btn.primary:hover{background:var(--primary-h)}
+.btn.green{background:var(--green);border-color:var(--green)}
+.btn.sm{padding:6px 11px;font-size:12px}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
 
-def load_all_settings():
-    if os.path.exists(SETTINGS_FILE):
-        with open(SETTINGS_FILE, "r", encoding="utf-8") as f:
-            try:
-                return json.load(f)
-            except:
-                return {}
-    return {}
+main{max-width:1000px;margin:auto;padding:24px 16px 60px}
 
-def save_all_settings(data):
-    with open(SETTINGS_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
+/* الرئيسية */
+.hero{text-align:center;padding:50px 10px 30px}
+.hero h1{font-size:34px;font-weight:800;margin-bottom:10px}
+.hero h1 b{color:var(--primary)}
+.hero p{color:var(--muted);max-width:560px;margin:0 auto 22px;font-size:15px}
+.hero .cta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.stats{display:flex;gap:12px;justify-content:center;margin:26px 0;flex-wrap:wrap}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 26px;text-align:center;min-width:140px}
+.stat b{display:block;font-size:24px;color:#fff}
+.stat span{font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px}
+.card h3{font-size:16px;margin-bottom:6px}
+.card p{font-size:13px;color:var(--muted)}
+.sec-title{font-size:20px;font-weight:800;margin:34px 0 14px}
 
-# 1. واجهة الموقع الكاملة (HTML + CSS + JS) مدمجة بالبايثون مع دعم الصور والأزرار المتعددة
-@app.get("/", response_class=HTMLResponse)
-async def serve_dashboard():
-    return """
-    <!DOCTYPE html>
-    <html lang="ar" dir="rtl">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>ItzF18 Bot - لوحة التحكم</title>
-        <style>
-            * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, sans-serif; }
-            body { background-color: #0f1015; color: #ffffff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
-            nav { width: 100%; background: #16181d; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222630; }
-            .logo { font-size: 20px; font-weight: bold; color: #5865F2; }
-            .nav-links { display: flex; gap: 15px; align-items: center; }
-            .btn-nav { background: #23272a; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 600; transition: 0.2s; border: 1px solid #2f3136; }
-            .btn-nav:hover { background: #2f3136; }
-            .btn-discord { background: #5865F2; display: flex; align-items: center; gap: 8px; border: none; }
-            .btn-discord:hover { background: #4752c4; }
-            .container { max-width: 700px; width: 100%; padding: 30px 20px; }
-            .header-title { font-size: 22px; margin-bottom: 5px; font-weight: 700; }
-            .header-sub { font-size: 13px; color: #a3a6ad; margin-bottom: 25px; }
-            .card { background: #16181d; border: 1px solid #222630; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
-            .card h3 { font-size: 16px; margin-bottom: 15px; color: #fff; display: flex; align-items: center; gap: 8px; }
-            label { display: block; font-size: 12px; color: #b9bbbe; margin-top: 12px; margin-bottom: 5px; font-weight: 600; }
-            select, input, textarea { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #2f3136; background: #0f1015; color: #fff; font-size: 13px; }
-            textarea { resize: vertical; height: 70px; }
-            select:focus, input:focus, textarea:focus { border-color: #5865F2; outline: none; }
-            .btn-save { width: 100%; background: #5865F2; color: white; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; border: none; font-size: 14px; transition: 0.2s; margin-top: 10px; }
-            .btn-save:hover { background: #4752c4; }
-        </style>
-    </head>
-    <body>
-        <nav>
-            <div class="logo">⚡ ItzF18 Dashboard</div>
-            <div class="nav-links">
-                <a href="https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=8&scope=bot" target="_blank" class="btn-nav">🤖 دعوة البوت</a>
-                <a href="https://discord.com/api/oauth2/authorize?client_id=YOUR_CLIENT_ID&redirect_uri=http://127.0.0.1:5000&response_type=code&scope=identify%20guilds" class="btn-nav btn-discord">
-                    تسجيل الدخول
-                </a>
-            </div>
-        </nav>
+/* الأوامر */
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+input[type=text],select{background:var(--surface);border:1px solid var(--border);color:#fff;border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit;width:100%}
+input[type=text]:focus,select:focus{outline:none;border-color:var(--primary)}
+.toolbar input{flex:2;min-width:180px}.toolbar select{flex:1;min-width:150px}
+.cmd{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px}
+.cmd-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.cmd-name{font-family:Consolas,monospace;font-weight:700;color:#fff;background:var(--surface2);padding:3px 10px;border-radius:7px;direction:ltr}
+.badge{font-size:11px;padding:2px 8px;border-radius:20px;background:#3a2a10;color:var(--orange);font-weight:700}
+.cmd p{color:#c9cdd6;font-size:14px;margin-top:8px}
+.opts{margin-top:8px;display:flex;flex-direction:column;gap:3px}
+.opt{font-size:12.5px;color:var(--muted)}
+.opt code{color:#c3c8ff;background:var(--surface2);padding:1px 6px;border-radius:5px;direction:ltr;display:inline-block}
+.cat-title{font-size:15px;font-weight:800;margin:22px 0 10px;color:#dfe2ff}
 
-        <div class="container">
-            <div class="header-title">إعدادات السيرفر</div>
-            <div class="header-sub">تحكم بأنظمة البوت والصور والأزرار المتعددة للتكت والترحيب.</div>
+/* قائمة السيرفرات */
+.srv{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px}
+.srv img,.srv .ph{width:46px;height:46px;border-radius:50%;background:var(--surface2);flex-shrink:0;object-fit:cover}
+.srv .ph{display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--muted)}
+.srv .nm{flex:1;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-            <div class="card">
-                <h3>🌐 معرف السيرفر (Guild ID)</h3>
-                <input type="text" id="guildIdInput" placeholder="أدخل ID السيرفر هنا...">
-            </div>
+/* لوحة السيرفر */
+.back{display:inline-block;margin-bottom:14px;color:var(--muted);font-size:14px}
+.g-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+.g-head img{width:54px;height:54px;border-radius:50%}
+.g-head h2{font-size:21px}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px}
+.panel h3{font-size:15px;margin-bottom:10px}
+.quick{display:flex;gap:8px;flex-wrap:wrap}
+.quick select{flex:1;min-width:180px}
+.log{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px}
+.log.err{border-color:#5a2226}
+.log-h{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.log-t{font-weight:800;font-size:15px}
+.log-d{font-size:12.5px;color:var(--muted);margin:3px 0 10px}
+.log-c{display:flex;gap:8px;flex-wrap:wrap}
+.log-c select{flex:1;min-width:180px}
+.st{font-size:12.5px;margin-top:8px;min-height:0}
+.st.bad{color:#ff7b7e}.st.good{color:#6fdc8c}.st.warn{color:var(--orange)}
 
-            <div class="card">
-                <h3>👋 نظام الترحيب (Welcome)</h3>
-                <label>روم الترحيب (Channel ID):</label>
-                <input type="text" id="welcomeChannel" placeholder="ID روم الترحيب">
-                <label>رسالة الترحيب:</label>
-                <input type="text" id="welcomeMsg" value="أهلاً بك يا {user} في سيرفر {server}">
-                <label>رابط صورة الترحيب (Image URL):</label>
-                <input type="text" id="welcomeImg" placeholder="https://example.com/image.png">
-            </div>
+.switch{position:relative;width:46px;height:26px;flex-shrink:0}
+.switch input{display:none}
+.switch span{position:absolute;inset:0;background:#2a303d;border-radius:26px;transition:.2s}
+.switch span:before{content:"";position:absolute;width:20px;height:20px;top:3px;right:3px;background:#fff;border-radius:50%;transition:.2s}
+.switch input:checked+span{background:var(--green)}
+.switch input:checked+span:before{right:23px}
 
-            <div class="card">
-                <h3>🚀 نظام البوست (Boost)</h3>
-                <label>روم البوست (Channel ID):</label>
-                <input type="text" id="boostChannel" placeholder="ID روم البوست">
-                <label>رسالة البوست:</label>
-                <input type="text" id="boostMsg" value="شكراً لدعمك السيرفر يا {user}! 🚀">
-                <label>رابط صورة البوست (Image URL):</label>
-                <input type="text" id="boostImg" placeholder="https://example.com/boost.png">
-            </div>
+.savebar{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 40%);padding:16px 0 4px;margin-top:10px}
+.savebar .btn{width:100%;padding:13px;font-size:15px}
 
-            <div class="card">
-                <h3>🎫 نظام التكت (Tickets)</h3>
-                <label>روم البانل (Channel ID):</label>
-                <input type="text" id="ticketChannel" placeholder="ID الروم">
-                <label>تصنيف الرومات (Category ID):</label>
-                <input type="text" id="ticketCategory" placeholder="ID التصنيف">
-                <label>رسالة بانل التكت:</label>
-                <textarea id="ticketMsg">اضغط على الزر أدناه لفتح تكت جديدة للمساعدة.</textarea>
-                <label>رابط صورة التكت (Image URL):</label>
-                <input type="text" id="ticketImg" placeholder="https://example.com/ticket.png">
-                <label>أسماء الأزرار المتعددة (مفصولة بفاصلة ,):</label>
-                <input type="text" id="ticketButtons" value="دعم فني, إبلاغ, استفسار">
-            </div>
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border);padding:11px 20px;border-radius:10px;font-size:14px;z-index:50;box-shadow:0 8px 30px rgba(0,0,0,.5);max-width:92vw}
+.toast.ok{border-color:var(--green)}.toast.bad{border-color:var(--red)}
+.center{text-align:center;padding:50px 10px;color:var(--muted)}
+.user-chip{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.user-chip img{width:28px;height:28px;border-radius:50%}
+footer{text-align:center;color:#5b6272;font-size:12px;padding:30px 0}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-in">
+    <a class="logo" href="#/">⚡ <span>ItzF18 <b>Bot</b></span></a>
+    <div class="links">
+      <a href="#/" data-r="home">الرئيسية</a>
+      <a href="#/commands" data-r="commands">الأوامر</a>
+      <a href="#/dashboard" data-r="dashboard">لوحة التحكم</a>
+    </div>
+    <div class="nav-r" id="navr"></div>
+  </div>
+</nav>
 
-            <button onclick="saveSettings()" class="btn-save">حفظ التغييرات وتطبيقها 💾</button>
-        </div>
+<main id="app"><div class="center">جاري التحميل...</div></main>
+<footer>ItzF18 Bot © لوحة التحكم</footer>
 
-        <script>
-            async function saveSettings() {
-                const guildId = document.getElementById('guildIdInput').value.trim();
-                if (!guildId) {
-                    alert('❌ | يرجى إدخال ID السيرفر أولاً!');
-                    return;
-                }
+<script>
+const INVITE = "https://discord.com/oauth2/authorize?client_id=1546817538149711922&permissions=8&integration_type=0&scope=bot";
+const app = document.getElementById('app');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let me = { loggedIn: false };
 
-                const settingsData = {
-                    welcome_enabled: true,
-                    welcome_channel: document.getElementById('welcomeChannel').value,
-                    welcome_message: document.getElementById('welcomeMsg').value,
-                    welcome_img: document.getElementById('welcomeImg').value,
+function toast(msg, type) {
+  document.querySelectorAll('.toast').forEach(t => t.remove());
+  const t = document.createElement('div');
+  t.className = 'toast ' + (type || '');
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3800);
+}
 
-                    boost_enabled: true,
-                    boost_channel: document.getElementById('boostChannel').value,
-                    boost_message: document.getElementById('boostMsg').value,
-                    boost_img: document.getElementById('boostImg').value,
+async function api(path, body) {
+  const opts = { credentials: 'same-origin', headers: {} };
+  if (body !== undefined) {
+    opts.method = 'POST';
+    opts.headers['Content-Type'] = 'application/json';
+    opts.headers['X-Requested-With'] = 'dashboard';
+    opts.body = JSON.stringify(body);
+  }
+  const res = await fetch(path, opts);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) { const e = new Error(data.error || ('HTTP ' + res.status)); e.status = res.status; throw e; }
+  return data;
+}
 
-                    ticket_enabled: true,
-                    ticket_channel: document.getElementById('ticketChannel').value,
-                    ticket_category: document.getElementById('ticketCategory').value,
-                    ticket_message: document.getElementById('ticketMsg').value,
-                    ticket_img: document.getElementById('ticketImg').value,
-                    ticket_buttons: document.getElementById('ticketButtons').value
-                };
+/* ───── الشريط العلوي ───── */
+function renderNav() {
+  const r = document.getElementById('navr');
+  const invite = `<a class="btn primary sm" href="${INVITE}" target="_blank" rel="noopener">➕ إضافة البوت</a>`;
+  if (me.loggedIn) {
+    const av = me.user.avatar ? `<img src="https://cdn.discordapp.com/avatars/${esc(me.user.id)}/${esc(me.user.avatar)}.png?size=64" alt="">` : '';
+    r.innerHTML = `${invite}<div class="user-chip">${av}<span>${esc(me.user.globalName || me.user.username)}</span></div><a class="btn sm" href="/logout">خروج</a>`;
+  } else {
+    r.innerHTML = `${invite}<a class="btn sm" href="/login">تسجيل الدخول</a>`;
+  }
+}
 
-                try {
-                    const response = await fetch('/api/update-settings', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ guild_id: guildId, settings: settingsData })
-                    });
-                    const result = await response.json();
-                    if (result.status === 'success') {
-                        alert('✅ | تم حفظ جميع الإعدادات والصور والأزرار وتحديث البوت بنجاح!');
-                    } else {
-                        alert('❌ | حدث خطأ أثناء الحفظ.');
-                    }
-                } catch (error) {
-                    alert('❌ | تعذر الاتصال بالسيرفر.');
-                }
-            }
-        </script>
-    </body>
-    </html>
-    """
+/* ───── الرئيسية ───── */
+async function renderHome() {
+  app.innerHTML = `
+    <section class="hero">
+      <h1>بوت <b>ItzF18</b> لإدارة سيرفرك</h1>
+      <p>سجلات متقدمة، حماية، رايدات وتوبات، رتب تلقائية، وذكاء اصطناعي. تحكم بكل شي من الموقع.</p>
+      <div class="cta">
+        <a class="btn primary" href="${INVITE}" target="_blank" rel="noopener">➕ إضافة البوت لسيرفرك</a>
+        <a class="btn" href="#/dashboard">🎛️ لوحة التحكم</a>
+      </div>
+    </section>
+    <div class="stats" id="stats"></div>
+    <div class="sec-title">المميزات</div>
+    <div class="grid">
+      <div class="card"><h3>📜 سجلات السيرفر</h3><p>حذف وتعديل الرسائل، الرومات الصوتية، الطرد والباند والتايم أوت مع اسم المنفذ والسبب. كل سيرفر بإعداداته المستقلة.</p></div>
+      <div class="card"><h3>⚔️ الرايدات والتوبات</h3><p>إعلان الرايد، تسجيل النتائج، لوحة توب 10 و 20 تتحدث تلقائياً، ورتب حسب عدد الرايدات.</p></div>
+      <div class="card"><h3>🛡️ الحماية</h3><p>كلمات ممنوعة مع تحذيرات وعقوبة تلقائية (طرد، باند، تايم أوت) تحددها أنت.</p></div>
+      <div class="card"><h3>👋 الترحيب والبوست</h3><p>رسائل ترحيب ومغادرة وشكر البوست بصور ورسائل مخصصة.</p></div>
+      <div class="card"><h3>🤖 ذكاء اصطناعي</h3><p>منشن البوت ويقرأ الصور والفيديوهات ويكتب الأكواد كملفات.</p></div>
+      <div class="card"><h3>💾 النسخ الاحتياطي</h3><p>نسخ واستعادة بنية السيرفر بخطوات بسيطة.</p></div>
+    </div>`;
+  try {
+    const s = await api('/api/stats');
+    document.getElementById('stats').innerHTML =
+      `<div class="stat"><b>${s.guilds}</b><span>سيرفر</span></div><div class="stat"><b>${s.members.toLocaleString('en')}</b><span>عضو</span></div>`;
+  } catch (e) {}
+}
 
-# 2. استقبال الإعدادات وتحديثها
-@app.post("/api/update-settings")
-async def update_settings(payload: dict):
-    guild_id = str(payload.get("guild_id"))
-    new_settings = payload.get("settings", {})
-    if not guild_id:
-        raise HTTPException(status_code=400, detail="Missing guild_id")
-    
-    all_data = load_all_settings()
-    all_data[guild_id] = new_settings
-    save_all_settings(all_data)
-    return {"status": "success"}
+/* ───── الأوامر ───── */
+async function renderCommands() {
+  app.innerHTML = '<div class="center">جاري تحميل الأوامر...</div>';
+  let cmds;
+  try { cmds = (await api('/api/commands')).commands; }
+  catch (e) { app.innerHTML = '<div class="center">❌ تعذر تحميل الأوامر.</div>'; return; }
 
-# 3. أحداث البوت (الترحيب، البوست، وتطبيق الصور)
-@bot.event
-async def on_ready():
-    print(f"Logged in as {bot.user.name}")
+  const cats = [...new Set(cmds.map(c => c.category))];
+  app.innerHTML = `
+    <div class="sec-title" style="margin-top:6px">📖 شرح الأوامر</div>
+    <div class="toolbar">
+      <input type="text" id="q" placeholder="ابحث عن أمر...">
+      <select id="cat"><option value="">كل الأقسام</option>${cats.map(c => `<option>${esc(c)}</option>`).join('')}</select>
+    </div>
+    <div id="list"></div>`;
 
-@bot.event
-async def on_member_join(member):
-    data = load_all_settings()
-    guild_id = str(member.guild.id)
-    if guild_id in data and data[guild_id].get("welcome_enabled", False):
-        settings = data[guild_id]
-        channel = member.guild.get_channel(int(settings.get("welcome_channel", 0)))
-        if channel:
-            msg = settings.get("welcome_message", "").replace("{user}", member.mention).replace("{server}", member.guild.name)
-            img_url = settings.get("welcome_img", "")
-            
-            if img_url:
-                embed = discord.Embed(description=msg, color=0x5865F2)
-                embed.set_image(url=img_url)
-                await channel.send(embed=embed)
-            else:
-                await channel.send(msg)
+  const draw = () => {
+    const q = document.getElementById('q').value.trim().toLowerCase();
+    const cat = document.getElementById('cat').value;
+    const shown = cmds.filter(c => (!cat || c.category === cat) &&
+      (!q || c.name.toLowerCase().includes(q) || c.description.toLowerCase().includes(q)));
+    if (!shown.length) { document.getElementById('list').innerHTML = '<div class="center">ما فيه نتائج.</div>'; return; }
 
-@bot.event
-async def on_member_update(before: discord.Member, after: discord.Member):
-    if before.premium_since is None and after.premium_since is not None:
-        data = load_all_settings()
-        guild_id = str(after.guild.id)
-        if guild_id in data and data[guild_id].get("boost_enabled", False):
-            settings = data[guild_id]
-            channel = after.guild.get_channel(int(settings.get("boost_channel", 0)))
-            if channel:
-                msg = settings.get("boost_message", "").replace("{user}", after.mention)
-                img_url = settings.get("boost_img", "")
-                
-                if img_url:
-                    embed = discord.Embed(description=msg, color=0xF47FFF)
-                    embed.set_image(url=img_url)
-                    await channel.send(embed=embed)
-                else:
-                    await channel.send(msg)
+    let html = '';
+    for (const c of [...new Set(shown.map(x => x.category))]) {
+      html += `<div class="cat-title">${esc(c)}</div>`;
+      for (const x of shown.filter(s => s.category === c)) {
+        html += `<div class="cmd"><div class="cmd-h"><span class="cmd-name">/${esc(x.name)}</span>${x.adminOnly ? '<span class="badge">للإدارة</span>' : ''}</div>
+          <p>${esc(x.description)}</p>
+          ${x.options.length ? '<div class="opts">' + x.options.map(o => `<div class="opt"><code>${esc(o.name)}</code> ${o.required ? '(مطلوب)' : '(اختياري)'} — ${esc(o.description)}</div>`).join('') + '</div>' : ''}</div>`;
+      }
+    }
+    document.getElementById('list').innerHTML = html;
+  };
+  document.getElementById('q').oninput = draw;
+  document.getElementById('cat').onchange = draw;
+  draw();
+}
 
-# تشغيل السيرفر والبوت معاً
-async def main():
-    config = uvicorn.Config(app, host="0.0.0.0", port=5000, log_level="warning")
-    server = uvicorn.Server(config)
-    await asyncio.gather(
-        server.serve(),
-        bot.start("YOUR_BOT_TOKEN")  # ضع توكن بوتك هنا
-    )
+/* ───── لوحة التحكم: قائمة السيرفرات ───── */
+async function renderDashboard() {
+  if (!me.loggedIn) {
+    app.innerHTML = `<div class="center"><h2 style="color:#fff;margin-bottom:10px">🔐 سجّل دخول بحساب ديسكورد</h2>
+      <p style="margin-bottom:18px">عشان تدير سيرفراتك لازم تسجل دخول.</p>
+      ${me.loginEnabled === false ? '<p style="color:var(--orange)">تسجيل الدخول غير مفعّل حالياً (CLIENT_SECRET ناقص).</p>' : '<a class="btn primary" href="/login">تسجيل الدخول بديسكورد</a>'}</div>`;
+    return;
+  }
+  const guilds = me.guilds;
+  app.innerHTML = `<div class="sec-title" style="margin-top:6px">🏰 اختر السيرفر</div>
+    ${guilds.length ? '<div class="grid" id="gl"></div>' : '<div class="center">ما عندك سيرفرات تقدر تديرها (تحتاج صلاحية Manage Server).</div>'}`;
+  const gl = document.getElementById('gl');
+  if (!gl) return;
+  gl.innerHTML = guilds.map(g => `
+    <div class="srv">
+      ${g.icon ? `<img src="${esc(g.icon)}" alt="">` : `<div class="ph">${esc(g.name.charAt(0))}</div>`}
+      <div class="nm">${esc(g.name)}</div>
+      ${g.botIn ? `<a class="btn primary sm" href="#/dashboard/${esc(g.id)}">إدارة</a>`
+                : `<a class="btn green sm" target="_blank" rel="noopener" href="${INVITE}&guild_id=${esc(g.id)}&disable_guild_select=true">إضافة</a>`}
+    </div>`).join('');
+}
 
-if __name__ == "__main__":
-    asyncio.run(main())
+/* ───── لوحة التحكم: سيرفر محدد ───── */
+async function renderGuild(id) {
+  app.innerHTML = '<div class="center">جاري التحميل...</div>';
+  let d;
+  try { d = await api('/api/guild/' + id); }
+  catch (e) {
+    app.innerHTML = `<div class="center"><p style="color:#ff7b7e;margin-bottom:14px">❌ ${esc(e.message)}</p><a class="btn" href="#/dashboard">رجوع</a></div>`;
+    return;
+  }
 
+  const opts = sel => {
+    const byCat = {};
+    d.channels.forEach(c => (byCat[c.category || 'بدون قسم'] = byCat[c.category || 'بدون قسم'] || []).push(c));
+    let h = '<option value="">— اختر روم —</option>';
+    for (const [cat, list] of Object.entries(byCat)) {
+      h += `<optgroup label="${esc(cat)}">` + list.map(c =>
+        `<option value="${esc(c.id)}" ${c.id === sel ? 'selected' : ''}>#${esc(c.name)}${c.canSend ? '' : ' ⚠️'}</option>`).join('') + '</optgroup>';
+    }
+    return h;
+  };
+  const chById = Object.fromEntries(d.channels.map(c => [c.id, c]));
+
+  app.innerHTML = `
+    <a class="back" href="#/dashboard">← رجوع للسيرفرات</a>
+    <div class="g-head">${d.guild.icon ? `<img src="${esc(d.guild.icon)}" alt="">` : ''}<h2>${esc(d.guild.name)}</h2></div>
+
+    <div class="panel">
+      <h3>⚡ تعيين روم واحد لكل السجلات</h3>
+      <div class="quick"><select id="allCh">${opts('')}</select><button class="btn" id="applyAll">تطبيق على الكل</button></div>
+    </div>
+
+    <div class="sec-title" style="margin-top:6px">📜 السجلات (Logs)</div>
+    <div id="logs">${d.types.map(t => {
+      const s = d.settings[t.key] || {};
+      return `<div class="log" data-t="${esc(t.key)}">
+        <div class="log-h"><div class="log-t">${t.icon} ${esc(t.name)}</div>
+          <label class="switch"><input type="checkbox" class="en" ${s.enabled ? 'checked' : ''}><span></span></label></div>
+        <div class="log-d">${esc(t.desc)}</div>
+        <div class="log-c"><select class="ch">${opts(s.channel_id)}</select><button class="btn sm test">🧪 اختبار</button></div>
+        <div class="st"></div></div>`;
+    }).join('')}</div>
+
+    <div class="savebar"><button class="btn primary" id="save">💾 حفظ التغييرات</button></div>`;
+
+  const rows = () => [...document.querySelectorAll('.log')];
+  const setSt = (row, text, cls) => { const el = row.querySelector('.st'); el.textContent = text || ''; el.className = 'st ' + (cls || ''); row.classList.toggle('err', cls === 'bad'); };
+
+  const refreshWarn = row => {
+    const ch = chById[row.querySelector('.ch').value];
+    if (ch && !ch.canSend) setSt(row, '⚠️ ' + ch.sendError, 'warn');
+    else if (!row.dataset.keep) setSt(row, '', '');
+  };
+
+  rows().forEach(row => {
+    const t = row.dataset.t;
+    const err = d.errors[t];
+    if (err) { row.dataset.keep = '1'; setSt(row, '❌ آخر خطأ: ' + err.message, 'bad'); }
+    else refreshWarn(row);
+    row.querySelector('.ch').onchange = () => { delete row.dataset.keep; refreshWarn(row); };
+    row.querySelector('.test').onclick = async () => {
+      const chId = row.querySelector('.ch').value;
+      if (!chId) { setSt(row, '❌ اختر روم أول.', 'bad'); return; }
+      setSt(row, '⏳ جاري الاختبار...', '');
+      try {
+        const r = await api('/api/guild/' + id + '/test', { type: t, channel_id: chId });
+        r.ok ? setSt(row, '✅ وصلت رسالة الاختبار بالروم.', 'good') : setSt(row, '❌ ' + r.error, 'bad');
+      } catch (e) { setSt(row, '❌ ' + e.message, 'bad'); }
+    };
+  });
+
+  document.getElementById('applyAll').onclick = () => {
+    const v = document.getElementById('allCh').value;
+    if (!v) { toast('اختر روم أول.', 'bad'); return; }
+    rows().forEach(r => { r.querySelector('.ch').value = v; r.querySelector('.en').checked = true; delete r.dataset.keep; refreshWarn(r); });
+    toast('تم التعيين، اضغط حفظ لتطبيق التغييرات.');
+  };
+
+  document.getElementById('save').onclick = async () => {
+    const btn = document.getElementById('save');
+    const payload = {};
+    rows().forEach(r => payload[r.dataset.t] = { enabled: r.querySelector('.en').checked, channel_id: r.querySelector('.ch').value || null });
+    for (const [k, v] of Object.entries(payload)) {
+      if (v.enabled && !v.channel_id) { toast('اختر روم للسجلات المفعّلة.', 'bad'); return; }
+    }
+    btn.disabled = true; btn.textContent = 'جاري الحفظ...';
+    try {
+      const r = await api('/api/guild/' + id + '/logs', { logs: payload });
+      const errs = Object.entries(r.errors || {});
+      rows().forEach(row => { delete row.dataset.keep; setSt(row, '', ''); refreshWarn(row); });
+      errs.forEach(([k, msg]) => { const row = document.querySelector(`.log[data-t="${k}"]`); if (row) { row.dataset.keep = '1'; setSt(row, '❌ ' + msg, 'bad'); row.querySelector('.en').checked = false; } });
+      errs.length ? toast(`تم الحفظ، لكن ${errs.length} سجل فيه خطأ (شوف الأحمر).`, 'bad') : toast('✅ تم حفظ الإعدادات.', 'ok');
+    } catch (e) { toast('❌ ' + e.message, 'bad'); }
+    btn.disabled = false; btn.textContent = '💾 حفظ التغييرات';
+  };
+}
+
+/* ───── التنقل ───── */
+async function route() {
+  const h = (location.hash || '#/').slice(1);
+  document.querySelectorAll('.links a').forEach(a => a.classList.remove('active'));
+  const mark = r => document.querySelector(`.links a[data-r="${r}"]`)?.classList.add('active');
+  const gm = h.match(/^\/dashboard\/(\d+)$/);
+
+  if (h.startsWith('/commands')) { mark('commands'); return renderCommands(); }
+  if (gm) { mark('dashboard'); if (!me.loggedIn) return renderDashboard(); return renderGuild(gm[1]); }
+  if (h.startsWith('/dashboard')) { mark('dashboard'); return renderDashboard(); }
+  mark('home'); return renderHome();
+}
+
+(async function init() {
+  try { me = await api('/api/me'); } catch (e) {}
+  renderNav();
+  window.addEventListener('hashchange', route);
+  route();
+})();
+</script>
+</body>
+</html>
