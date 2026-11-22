@@ -89,7 +89,6 @@ module.exports = {
             }
 
             const config = loadConfig();
-            const clan = config.clan_name || "VLX";
             const embedColor = config.embed_color || 0x8B0000;
 
             const embed = new EmbedBuilder()
@@ -116,7 +115,7 @@ module.exports = {
                 embed.setImage(`attachment://${attachName}`);
             }
 
-            embed.setFooter({ text: `Raid Initiated by ${interaction.user.tag} | ${clan} Clan` });
+            embed.setFooter({ text: `Raid Initiated by ${interaction.user.tag}` });
 
             const row = new ActionRowBuilder().addComponents(
                 new ButtonBuilder().setLabel("Join").setStyle(ButtonStyle.Link).setURL(link).setEmoji("🎮"),
