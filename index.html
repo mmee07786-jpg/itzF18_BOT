@@ -16,7 +16,6 @@ body{background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
 a{color:inherit;text-decoration:none}
 button{font-family:inherit;cursor:pointer}
 
-/* الشريط العلوي */
 nav{position:sticky;top:0;z-index:20;background:rgba(10,12,17,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
 .nav-in{max-width:1000px;margin:auto;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .logo{font-weight:800;font-size:18px;color:#fff;display:flex;align-items:center;gap:8px}
@@ -36,7 +35,6 @@ nav{position:sticky;top:0;z-index:20;background:rgba(10,12,17,.92);backdrop-filt
 
 main{max-width:1000px;margin:auto;padding:24px 16px 60px}
 
-/* الرئيسية */
 .hero{text-align:center;padding:50px 10px 30px}
 .hero h1{font-size:34px;font-weight:800;margin-bottom:10px}
 .hero h1 b{color:var(--primary)}
@@ -52,7 +50,6 @@ main{max-width:1000px;margin:auto;padding:24px 16px 60px}
 .card p{font-size:13px;color:var(--muted)}
 .sec-title{font-size:20px;font-weight:800;margin:34px 0 14px}
 
-/* الأوامر */
 .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
 input[type=text],select{background:var(--surface);border:1px solid var(--border);color:#fff;border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit;width:100%}
 input[type=text]:focus,select:focus{outline:none;border-color:var(--primary)}
@@ -67,13 +64,11 @@ input[type=text]:focus,select:focus{outline:none;border-color:var(--primary)}
 .opt code{color:#c3c8ff;background:var(--surface2);padding:1px 6px;border-radius:5px;direction:ltr;display:inline-block}
 .cat-title{font-size:15px;font-weight:800;margin:22px 0 10px;color:#dfe2ff}
 
-/* قائمة السيرفرات */
 .srv{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px}
 .srv img,.srv .ph{width:46px;height:46px;border-radius:50%;background:var(--surface2);flex-shrink:0;object-fit:cover}
 .srv .ph{display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--muted)}
 .srv .nm{flex:1;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
-/* لوحة السيرفر */
 .back{display:inline-block;margin-bottom:14px;color:var(--muted);font-size:14px}
 .g-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}
 .g-head img{width:54px;height:54px;border-radius:50%}
@@ -127,10 +122,14 @@ footer{text-align:center;color:#5b6272;font-size:12px;padding:30px 0}
 <footer>ItzF18 Bot © لوحة التحكم</footer>
 
 <script>
+// ضع هنا رابط السيرفر الذي يشغل dashboard.js (بدون / في النهاية)، أو اتركه "" إذا كان نفس دومين الموقع
+const API_BASE = "";
+const url = p => `${API_BASE.replace(/\/+$/, '')}${p}`;
+
 const INVITE = "https://discord.com/oauth2/authorize?client_id=1546817538149711922&permissions=8&integration_type=0&scope=bot";
 const app = document.getElementById('app');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let me = { loggedIn: false };
+let me = { loggedIn: false, backendReachable: true };
 
 function toast(msg, type) {
   document.querySelectorAll('.toast').forEach(t => t.remove());
@@ -142,32 +141,30 @@ function toast(msg, type) {
 }
 
 async function api(path, body) {
-  const opts = { credentials: 'same-origin', headers: {} };
+  const opts = { credentials: 'include', headers: {} };
   if (body !== undefined) {
     opts.method = 'POST';
     opts.headers['Content-Type'] = 'application/json';
     opts.headers['X-Requested-With'] = 'dashboard';
     opts.body = JSON.stringify(body);
   }
-  const res = await fetch(path, opts);
+  const res = await fetch(url(path), opts);
   const data = await res.json().catch(() => ({}));
   if (!res.ok) { const e = new Error(data.error || ('HTTP ' + res.status)); e.status = res.status; throw e; }
   return data;
 }
 
-/* ───── الشريط العلوي ───── */
 function renderNav() {
   const r = document.getElementById('navr');
   const invite = `<a class="btn primary sm" href="${INVITE}" target="_blank" rel="noopener">➕ إضافة البوت</a>`;
   if (me.loggedIn) {
     const av = me.user.avatar ? `<img src="https://cdn.discordapp.com/avatars/${esc(me.user.id)}/${esc(me.user.avatar)}.png?size=64" alt="">` : '';
-    r.innerHTML = `${invite}<div class="user-chip">${av}<span>${esc(me.user.globalName || me.user.username)}</span></div><a class="btn sm" href="/logout">خروج</a>`;
+    r.innerHTML = `${invite}<div class="user-chip">${av}<span>${esc(me.user.globalName || me.user.username)}</span></div><a class="btn sm" href="${esc(url('/logout'))}">خروج</a>`;
   } else {
-    r.innerHTML = `${invite}<a class="btn sm" href="/login">تسجيل الدخول</a>`;
+    r.innerHTML = `${invite}<a class="btn sm" href="${esc(url('/login'))}">تسجيل الدخول</a>`;
   }
 }
 
-/* ───── الرئيسية ───── */
 async function renderHome() {
   app.innerHTML = `
     <section class="hero">
@@ -195,12 +192,11 @@ async function renderHome() {
   } catch (e) {}
 }
 
-/* ───── الأوامر ───── */
 async function renderCommands() {
   app.innerHTML = '<div class="center">جاري تحميل الأوامر...</div>';
   let cmds;
   try { cmds = (await api('/api/commands')).commands; }
-  catch (e) { app.innerHTML = '<div class="center">❌ تعذر تحميل الأوامر.</div>'; return; }
+  catch (e) { app.innerHTML = '<div class="center">❌ تعذر تحميل الأوامر (تأكد من تشغيل سيرفر البوت).</div>'; return; }
 
   const cats = [...new Set(cmds.map(c => c.category))];
   app.innerHTML = `
@@ -234,12 +230,16 @@ async function renderCommands() {
   draw();
 }
 
-/* ───── لوحة التحكم: قائمة السيرفرات ───── */
 async function renderDashboard() {
+  if (!me.backendReachable) {
+    app.innerHTML = `<div class="center"><h2 style="color:#fff;margin-bottom:10px">⚠️ تعذر الاتصال بسيرفر البوت</h2>
+      <p style="margin-bottom:14px">تأكد أن سيرفر البوت شغال وله رابط ويب عام مضبوط في <code>API_BASE</code>.</p></div>`;
+    return;
+  }
   if (!me.loggedIn) {
     app.innerHTML = `<div class="center"><h2 style="color:#fff;margin-bottom:10px">🔐 سجّل دخول بحساب ديسكورد</h2>
-      <p style="margin-bottom:18px">عشان تدير سيرفراتك لازم تسجل دخول.</p>
-      ${me.loginEnabled === false ? '<p style="color:var(--orange)">تسجيل الدخول غير مفعّل حالياً (CLIENT_SECRET ناقص).</p>' : '<a class="btn primary" href="/login">تسجيل الدخول بديسكورد</a>'}</div>`;
+      <p style="margin-bottom:18px">عشان تدير سيرفراتك وتضبط السجلات لازم تسجل دخول.</p>
+      ${me.loginEnabled === false ? '<p style="color:var(--orange)">تسجيل الدخول غير مفعّل حالياً (تحقق من CLIENT_SECRET في الاستضافة).</p>' : `<a class="btn primary" href="${esc(url('/login'))}">تسجيل الدخول بديسكورد</a>`}</div>`;
     return;
   }
   const guilds = me.guilds;
@@ -256,7 +256,6 @@ async function renderDashboard() {
     </div>`).join('');
 }
 
-/* ───── لوحة التحكم: سيرفر محدد ───── */
 async function renderGuild(id) {
   app.innerHTML = '<div class="center">جاري التحميل...</div>';
   let d;
@@ -352,7 +351,6 @@ async function renderGuild(id) {
   };
 }
 
-/* ───── التنقل ───── */
 async function route() {
   const h = (location.hash || '#/').slice(1);
   document.querySelectorAll('.links a').forEach(a => a.classList.remove('active'));
@@ -366,7 +364,8 @@ async function route() {
 }
 
 (async function init() {
-  try { me = await api('/api/me'); } catch (e) {}
+  try { me = { ...(await api('/api/me')), backendReachable: true }; }
+  catch (e) { me = { loggedIn: false, backendReachable: false }; }
   renderNav();
   window.addEventListener('hashchange', route);
   route();
