@@ -1,0 +1,337 @@
+const { EmbedBuilder, PermissionsBitField, ChannelType } = require('discord.js');
+const fs = require('fs');
+const path = require('path');
+
+const SETTINGS_FILE = path.join(__dirname, 'guild_settings.json');
+
+const LOG_TYPES = [
+  { key: 'messageDelete', name: 'حذف الرسائل', icon: '🗑️', desc: 'تسجيل الرسائل المحذوفة مع اسم المنفذ إن وجد.' },
+  { key: 'messageUpdate', name: 'تعديل الرسائل', icon: '✏️', desc: 'تسجيل الرسائل قبل وبعد التعديل.' },
+  { key: 'voiceStateUpdate', name: 'الرومات الصوتية', icon: '🔊', desc: 'دخول وخروج وتنقل الأعضاء بين الرومات الصوتية.' },
+  { key: 'memberKick', name: 'طرد الأعضاء', icon: '👢', desc: 'تسجيل حالات الطرد مع المسؤول والسبب.' },
+  { key: 'memberBan', name: 'الحظر وفك الحظر', icon: '🔨', desc: 'تسجيل الباند والأنباند مع المسؤول والسبب.' },
+  { key: 'memberTimeout', name: 'التايم أوت', icon: '⏳', desc: 'تسجيل إعطاء وإزالة التايم أوت.' },
+  { key: 'memberJoinLeave', name: 'دخول وخروج الأعضاء', icon: '🚪', desc: 'تسجيل دخول وخروج الأعضاء من السيرفر.' },
+  { key: 'memberUpdate', name: 'الرتب والأسماء', icon: '🏷️', desc: 'تغيير الرتب أو النكنيم للأعضاء.' },
+  { key: 'channelUpdate', name: 'الرومات', icon: '📁', desc: 'إنشاء وحذف وتعديل الرومات.' },
+  { key: 'roleUpdate', name: 'إدارة الرتب', icon: '🎭', desc: 'إنشاء وحذف وتعديل الرتب.' }
+];
+
+function loadSettings() {
+  try {
+    if (!fs.existsSync(SETTINGS_FILE)) return {};
+    return JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
+  } catch {
+    return {};
+  }
+}
+
+function saveSettings(data) {
+  fs.writeFileSync(SETTINGS_FILE, JSON.stringify(data, null, 2), 'utf8');
+}
+
+async function getMemberRoleStatus(guild, userId) {
+  if (!guild) return { inGuild: false, isAdmin: false, member: null };
+  try {
+    const member = await guild.members.fetch(userId).catch(() => null);
+    if (!member) return { inGuild: false, isAdmin: false, member: null };
+    const isAdmin =
+      member.permissions.has(PermissionsBitField.Flags.Administrator) ||
+      member.permissions.has(PermissionsBitField.Flags.ManageGuild);
+    return { inGuild: true, isAdmin, member };
+  } catch {
+    return { inGuild: false, isAdmin: false, member: null };
+  }
+}
+
+async function getUserGuildsWithRoles(client, userId) {
+  const result = [];
+  for (const guild of client.guilds.cache.values()) {
+    const status = await getMemberRoleStatus(guild, userId);
+    if (status.inGuild) {
+      result.push({
+        id: guild.id,
+        name: guild.name,
+        icon: guild.iconURL({ size: 128 }),
+        isAdmin: status.isAdmin,
+        roleLabel: status.isAdmin ? 'أدمن' : 'عضو'
+      });
+    }
+  }
+  return result;
+}
+
+async function requireAdminInGuild(guild, userId) {
+  const status = await getMemberRoleStatus(guild, userId);
+  if (!status.inGuild) {
+    return { ok: false, reason: 'أنت لست عضواً في هذا السيرفر.' };
+  }
+  if (!status.isAdmin) {
+    return { ok: false, reason: 'هذا النظام مخصص للأدمن فقط. كعضو عادي لا يعمل معك أي أمر إداري.' };
+  }
+  return { ok: true, member: status.member };
+}
+
+function findAutoLogChannel(guild) {
+  if (!guild || !guild.members.me) return null;
+  const textChannels = guild.channels.cache.filter(
+    c =>
+      c.type === ChannelType.GuildText &&
+      c.permissionsFor(guild.members.me)?.has([
+        PermissionsBitField.Flags.ViewChannel,
+        PermissionsBitField.Flags.SendMessages,
+        PermissionsBitField.Flags.EmbedLinks
+      ])
+  );
+  if (!textChannels.size) return null;
+  const preferred = textChannels.find(c => /^(logs?|log|audit|سجل|السجلات|لوق)/i.test(c.name));
+  return preferred || textChannels.first();
+}
+
+function autoSetupGuildLogs(guild, settingsStore) {
+  if (!guild) return {};
+  const current = settingsStore[guild.id] || {};
+  const autoCh = findAutoLogChannel(guild);
+  const updated = { ...current };
+
+  for (const t of LOG_TYPES) {
+    const existing = updated[t.key];
+    const validExistingChannel = existing?.channel_id && guild.channels.cache.has(existing.channel_id);
+    if (validExistingChannel) {
+      updated[t.key] = {
+        enabled: existing.enabled !== false,
+        channel_id: existing.channel_id
+      };
+    } else if (autoCh) {
+      updated[t.key] = {
+        enabled: true,
+        channel_id: autoCh.id
+      };
+    } else {
+      updated[t.key] = {
+        enabled: false,
+        channel_id: null
+      };
+    }
+  }
+
+  settingsStore[guild.id] = updated;
+  return updated;
+}
+
+function initLogs(client) {
+  const store = loadSettings();
+
+  const setupAllGuilds = () => {
+    for (const guild of client.guilds.cache.values()) {
+      autoSetupGuildLogs(guild, store);
+    }
+    saveSettings(store);
+  };
+
+  if (client.isReady()) {
+    setupAllGuilds();
+  } else {
+    client.once('clientReady', setupAllGuilds);
+  }
+
+  client.on('guildCreate', guild => {
+    autoSetupGuildLogs(guild, store);
+    saveSettings(store);
+  });
+
+  async function sendLog(guild, typeKey, embed) {
+    if (!guild) return;
+    let guildCfg = store[guild.id];
+    if (!guildCfg) {
+      guildCfg = autoSetupGuildLogs(guild, store);
+      saveSettings(store);
+    }
+
+    let cfg = guildCfg[typeKey];
+    if (!cfg || !cfg.channel_id || !guild.channels.cache.has(cfg.channel_id)) {
+      guildCfg = autoSetupGuildLogs(guild, store);
+      saveSettings(store);
+      cfg = guildCfg[typeKey];
+    }
+
+    if (!cfg || cfg.enabled === false || !cfg.channel_id) return;
+
+    const channel = guild.channels.cache.get(cfg.channel_id);
+    if (!channel || channel.type !== ChannelType.GuildText) return;
+
+    try {
+      await channel.send({ embeds: [embed] });
+    } catch {}
+  }
+
+  client.on('messageDelete', async message => {
+    if (!message.guild || message.author?.bot) return;
+    const embed = new EmbedBuilder()
+      .setColor(0xed4245)
+      .setTitle('🗑️ تم حذف رسالة')
+      .addFields(
+        { name: 'الكاتب', value: message.author ? `${message.author.tag} (${message.author.id})` : 'غير معروف', inline: true },
+        { name: 'الروم', value: message.channel ? `<#${message.channel.id}>` : 'غير معروف', inline: true },
+        { name: 'المحتوى', value: message.content ? message.content.slice(0, 1024) : '*لا يوجد نص*' }
+      )
+      .setTimestamp();
+    await sendLog(message.guild, 'messageDelete', embed);
+  });
+
+  client.on('messageUpdate', async (oldMsg, newMsg) => {
+    if (!newMsg.guild || newMsg.author?.bot) return;
+    if (oldMsg.content === newMsg.content) return;
+    const embed = new EmbedBuilder()
+      .setColor(0xfaa61a)
+      .setTitle('✏️ تم تعديل رسالة')
+      .addFields(
+        { name: 'الكاتب', value: `${newMsg.author.tag} (${newMsg.author.id})`, inline: true },
+        { name: 'الروم', value: `<#${newMsg.channel.id}>`, inline: true },
+        { name: 'قبل التعديل', value: (oldMsg.content || '*غير متوفر*').slice(0, 1024) },
+        { name: 'بعد التعديل', value: (newMsg.content || '*غير متوفر*').slice(0, 1024) }
+      )
+      .setTimestamp();
+    await sendLog(newMsg.guild, 'messageUpdate', embed);
+  });
+
+  client.on('voiceStateUpdate', async (oldState, newState) => {
+    const guild = newState.guild || oldState.guild;
+    const user = newState.member?.user || oldState.member?.user;
+    if (!guild || !user || user.bot) return;
+
+    let desc = null;
+    if (!oldState.channelId && newState.channelId) {
+      desc = `📥 دخل <@${user.id}> إلى الروم الصوتي <#${newState.channelId}>`;
+    } else if (oldState.channelId && !newState.channelId) {
+      desc = `📤 خرج <@${user.id}> من الروم الصوتي <#${oldState.channelId}>`;
+    } else if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
+      desc = `🔀 انتقل <@${user.id}> من <#${oldState.channelId}> إلى <#${newState.channelId}>`;
+    }
+    if (!desc) return;
+
+    const embed = new EmbedBuilder()
+      .setColor(0x5865f2)
+      .setTitle('🔊 تحديث الرومات الصوتية')
+      .setDescription(desc)
+      .setTimestamp();
+    await sendLog(guild, 'voiceStateUpdate', embed);
+  });
+
+  client.on('guildMemberAdd', async member => {
+    const embed = new EmbedBuilder()
+      .setColor(0x3ba55d)
+      .setTitle('📥 دخول عضو جديد')
+      .setDescription(`انضم <@${member.id}> (${member.user.tag}) إلى السيرفر.`)
+      .setTimestamp();
+    await sendLog(member.guild, 'memberJoinLeave', embed);
+  });
+
+  client.on('guildMemberRemove', async member => {
+    const embed = new EmbedBuilder()
+      .setColor(0x9aa1b0)
+      .setTitle('📤 خروج عضو')
+      .setDescription(`غادر <@${member.id}> (${member.user?.tag || member.id}) السيرفر.`)
+      .setTimestamp();
+    await sendLog(member.guild, 'memberJoinLeave', embed);
+  });
+
+  client.on('guildBanAdd', async ban => {
+    const embed = new EmbedBuilder()
+      .setColor(0xed4245)
+      .setTitle('🔨 تم حظر عضو')
+      .setDescription(`تم حظر **${ban.user.tag}** (${ban.user.id})${ban.reason ? `\n**السبب:** ${ban.reason}` : ''}.`)
+      .setTimestamp();
+    await sendLog(ban.guild, 'memberBan', embed);
+  });
+
+  client.on('guildBanRemove', async ban => {
+    const embed = new EmbedBuilder()
+      .setColor(0x3ba55d)
+      .setTitle('🔓 تم فك الحظر عن عضو')
+      .setDescription(`تم فك الحظر عن **${ban.user.tag}** (${ban.user.id}).`)
+      .setTimestamp();
+    await sendLog(ban.guild, 'memberBan', embed);
+  });
+
+  client.on('guildMemberUpdate', async (oldMember, newMember) => {
+    const guild = newMember.guild;
+    if (oldMember.nickname !== newMember.nickname) {
+      const embed = new EmbedBuilder()
+        .setColor(0x5865f2)
+        .setTitle('🏷️ تغيير اسم مستعار')
+        .addFields(
+          { name: 'العضو', value: `<@${newMember.id}>`, inline: true },
+          { name: 'القديم', value: oldMember.nickname || '*بدون*', inline: true },
+          { name: 'الجديد', value: newMember.nickname || '*بدون*', inline: true }
+        )
+        .setTimestamp();
+      await sendLog(guild, 'memberUpdate', embed);
+    }
+
+    const oldRoles = new Set(oldMember.roles.cache.keys());
+    const newRoles = new Set(newMember.roles.cache.keys());
+    const added = [...newRoles].filter(id => !oldRoles.has(id));
+    const removed = [...oldRoles].filter(id => !newRoles.has(id));
+
+    if (added.length || removed.length) {
+      const lines = [];
+      if (added.length) lines.push(`➕ تمت إضافة: ${added.map(id => `<@&${id}>`).join(', ')}`);
+      if (removed.length) lines.push(`➖ تمت إزالة: ${removed.map(id => `<@&${id}>`).join(', ')}`);
+      const embed = new EmbedBuilder()
+        .setColor(0x5865f2)
+        .setTitle('🎭 تحديث رتب عضو')
+        .setDescription(`العضو: <@${newMember.id}>\n${lines.join('\n')}`)
+        .setTimestamp();
+      await sendLog(guild, 'memberUpdate', embed);
+    }
+  });
+
+  client.on('channelCreate', async channel => {
+    if (!channel.guild) return;
+    const embed = new EmbedBuilder()
+      .setColor(0x3ba55d)
+      .setTitle('📁 تم إنشاء روم')
+      .setDescription(`الروم: <#${channel.id}> (${channel.name})`)
+      .setTimestamp();
+    await sendLog(channel.guild, 'channelUpdate', embed);
+  });
+
+  client.on('channelDelete', async channel => {
+    if (!channel.guild) return;
+    const embed = new EmbedBuilder()
+      .setColor(0xed4245)
+      .setTitle('🗑️ تم حذف روم')
+      .setDescription(`اسم الروم المحذوف: **${channel.name}** (${channel.id})`)
+      .setTimestamp();
+    await sendLog(channel.guild, 'channelUpdate', embed);
+  });
+
+  client.on('roleCreate', async role => {
+    const embed = new EmbedBuilder()
+      .setColor(0x3ba55d)
+      .setTitle('🎭 تم إنشاء رتبة')
+      .setDescription(`الرتبة: <@&${role.id}> (${role.name})`)
+      .setTimestamp();
+    await sendLog(role.guild, 'roleUpdate', embed);
+  });
+
+  client.on('roleDelete', async role => {
+    const embed = new EmbedBuilder()
+      .setColor(0xed4245)
+      .setTitle('🗑️ تم حذف رتبة')
+      .setDescription(`اسم الرتبة المحذوفة: **${role.name}** (${role.id})`)
+      .setTimestamp();
+    await sendLog(role.guild, 'roleUpdate', embed);
+  });
+}
+
+module.exports = {
+  LOG_TYPES,
+  loadSettings,
+  saveSettings,
+  getMemberRoleStatus,
+  getUserGuildsWithRoles,
+  requireAdminInGuild,
+  initLogs
+};
