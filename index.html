@@ -1,344 +1,124 @@
-const { EmbedBuilder, PermissionsBitField, ChannelType } = require('discord.js');
-const fs = require('fs');
-const path = require('path');
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ItzF18 Bot</title>
+<style>
+:root{
+  --bg:#0a0c11; --surface:#11141b; --surface2:#171b24; --border:#1f2531;
+  --text:#eef0f4; --muted:#9aa1b0; --primary:#5865F2; --primary-h:#4752c4;
+}
+*{box-sizing:border-box;margin:0;padding:0;font-family:"Segoe UI",Tahoma,Arial,sans-serif}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+a{color:inherit;text-decoration:none}
 
-const SETTINGS_FILE = path.join(__dirname, 'guild_settings.json');
+nav{position:sticky;top:0;z-index:20;background:rgba(10,12,17,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+.nav-in{max-width:1000px;margin:auto;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{font-weight:800;font-size:18px;color:#fff;display:flex;align-items:center;gap:8px}
+.logo b{color:var(--primary)}
+.links{display:flex;gap:4px;flex:1;flex-wrap:wrap}
+.links a{padding:7px 12px;border-radius:8px;color:var(--muted);font-size:14px;font-weight:600}
+.links a:hover,.links a.active{background:var(--surface2);color:#fff}
 
-const LOG_TYPES = [
-  { key: 'messageDelete', name: 'حذف الرسائل', icon: '🗑️', desc: 'تسجيل الرسائل المحذوفة مع اسم المنفذ إن وجد.' },
-  { key: 'messageUpdate', name: 'تعديل الرسائل', icon: '✏️', desc: 'تسجيل الرسائل قبل وبعد التعديل.' },
-  { key: 'voiceStateUpdate', name: 'الرومات الصوتية', icon: '🔊', desc: 'دخول وخروج وتنقل الأعضاء بين الرومات الصوتية.' },
-  { key: 'memberKick', name: 'طرد الأعضاء', icon: '👢', desc: 'تسجيل حالات الطرد مع المسؤول والسبب.' },
-  { key: 'memberBan', name: 'الحظر وفك الحظر', icon: '🔨', desc: 'تسجيل الباند والأنباند مع المسؤول والسبب.' },
-  { key: 'memberTimeout', name: 'التايم أوت', icon: '⏳', desc: 'تسجيل إعطاء وإزالة التايم أوت.' },
-  { key: 'memberJoinLeave', name: 'دخول وخروج الأعضاء', icon: '🚪', desc: 'تسجيل دخول وخروج الأعضاء من السيرفر.' },
-  { key: 'memberUpdate', name: 'الرتب والأسماء', icon: '🏷️', desc: 'تغيير الرتب أو النكنيم للأعضاء.' },
-  { key: 'channelUpdate', name: 'الرومات', icon: '📁', desc: 'إنشاء وحذف وتعديل الرومات.' },
-  { key: 'roleUpdate', name: 'إدارة الرتب', icon: '🎭', desc: 'إنشاء وحذف وتعديل الرتب.' }
-];
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 16px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:#fff;font-size:14px;font-weight:700}
+.btn.primary{background:var(--primary);border-color:var(--primary)}
+.btn.primary:hover{background:var(--primary-h)}
+.btn.sm{padding:6px 11px;font-size:12px}
 
-function loadSettings() {
-  try {
-    if (!fs.existsSync(SETTINGS_FILE)) return {};
-    return JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
-  } catch {
-    return {};
-  }
+main{max-width:1000px;margin:auto;padding:24px 16px 60px}
+.hero{text-align:center;padding:50px 10px 30px}
+.hero h1{font-size:34px;font-weight:800;margin-bottom:10px}
+.hero h1 b{color:var(--primary)}
+.hero p{color:var(--muted);max-width:580px;margin:0 auto 22px;font-size:15px}
+.hero .cta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px}
+.card h3{font-size:16px;margin-bottom:6px}
+.card p{font-size:13px;color:var(--muted)}
+.sec-title{font-size:20px;font-weight:800;margin:34px 0 14px}
+.box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px;margin-top:14px}
+.box h2{font-size:20px;margin-bottom:8px}
+.box p{color:var(--muted);font-size:14px;margin-bottom:10px}
+footer{text-align:center;color:#5b6272;font-size:12px;padding:30px 0}
+</style>
+</head>
+<body>
+<nav>
+  <div class="nav-in">
+    <a class="logo" href="#/">⚡ <span>ItzF18 <b>Bot</b></span></a>
+    <div class="links">
+      <a href="#/" data-r="home">الرئيسية</a>
+      <a href="#/commands" data-r="commands">الأوامر</a>
+      <a href="#/roles" data-r="roles">الصلاحيات</a>
+    </div>
+    <div>
+      <a class="btn primary sm" href="https://discord.com/oauth2/authorize?client_id=1546817538149711922&permissions=8&integration_type=0&scope=bot" target="_blank" rel="noopener">➕ إضافة البوت</a>
+    </div>
+  </div>
+</nav>
+
+<main id="app"></main>
+<footer>ItzF18 Bot</footer>
+
+<script>
+const app = document.getElementById('app');
+
+function renderHome() {
+  app.innerHTML = `
+    <section class="hero">
+      <h1>بوت <b>ItzF18</b> لإدارة سيرفرك</h1>
+      <p>يعمل تلقائياً على السيرفرات الموجود فيها، يسجل اللوقز، ويتحقق من رتبة الحساب في كل سيرفر (أدمن أو عضو).</p>
+      <div class="cta">
+        <a class="btn primary" href="https://discord.com/oauth2/authorize?client_id=1546817538149711922&permissions=8&integration_type=0&scope=bot" target="_blank" rel="noopener">➕ إضافة البوت لسيرفرك</a>
+        <a class="btn" href="#/roles">🛡️ نظام الصلاحيات</a>
+      </div>
+    </section>
+    <div class="sec-title">المميزات</div>
+    <div class="grid">
+      <div class="card"><h3>📜 سجلات تلقائية</h3><p>يحدد السيرفرات تلقائياً ويسجل الأحداث في روم السجلات المناسب.</p></div>
+      <div class="card"><h3>🛡️ أدمن أو عضو</h3><p>يفحص رتبة الشخص بكل سيرفر؛ إذا كان عضواً عادياً لا يعمل معه أي أمر إداري.</p></div>
+      <div class="card"><h3>⚔️ إدارة السيرفر</h3><p>تنظيم الرايدات والأدوات الإدارية للسيرفرات المشتركة.</p></div>
+    </div>`;
 }
 
-function saveSettings(data) {
-  fs.writeFileSync(SETTINGS_FILE, JSON.stringify(data, null, 2), 'utf8');
+function renderCommands() {
+  app.innerHTML = `
+    <div class="sec-title" style="margin-top:6px">📖 الأوامر والعمل</div>
+    <div class="box">
+      <h2>التشغيل التلقائي والسجلات</h2>
+      <p>• يعمل البوت تلقائياً على كل سيرفر يضمّه ويتابع السجلات دون إعداد يدوي.</p>
+      <p>• الأوامر الإدارية تعمل فقط مع الأدمن.</p>
+    </div>`;
 }
 
-// فحص هل الشخص أدمن في السيرفر المحدد أم عضو عادي
-async function getMemberRoleStatus(guild, userId) {
-  if (!guild) return { inGuild: false, isAdmin: false, member: null };
-  try {
-    const member = await guild.members.fetch(userId).catch(() => null);
-    if (!member) return { inGuild: false, isAdmin: false, member: null };
-    const isAdmin = member.permissions.has(PermissionsBitField.Flags.Administrator) ||
-                    member.permissions.has(PermissionsBitField.Flags.ManageGuild);
-    return { inGuild: true, isAdmin, member };
-  } catch {
-    return { inGuild: false, isAdmin: false, member: null };
-  }
+function renderRoles() {
+  app.innerHTML = `
+    <div class="box">
+      <h2>أدمن مقابل عضو</h2>
+      <p>• يتعرف البوت على السيرفرات المشتركة ويحدد في كل سيرفر هل الحساب <b>أدمن</b> أو <b>عضو</b>.</p>
+      <p>• إذا كان الحساب <b>عضواً</b> فقط، يتم رفض التنفيذ فوراً ولا يعمل معه أي شيء.</p>
+    </div>`;
 }
 
-// جلب كل السيرفرات المشتركة بين البوت والعضو مع بيان هل هو أدمن أو عضو
-async function getUserGuildsWithRoles(client, userId) {
-  const result = [];
-  for (const guild of client.guilds.cache.values()) {
-    const status = await getMemberRoleStatus(guild, userId);
-    if (status.inGuild) {
-      result.push({
-        id: guild.id,
-        name: guild.name,
-        icon: guild.iconURL({ size: 128 }),
-        isAdmin: status.isAdmin,
-        roleLabel: status.isAdmin ? 'أدمن' : 'عضو'
-      });
-    }
+function route() {
+  const h = (location.hash || '#/').slice(1);
+  document.querySelectorAll('.links a').forEach(a => a.classList.remove('active'));
+  if (h.startsWith('/commands')) {
+    document.querySelector('.links a[data-r="commands"]')?.classList.add('active');
+    return renderCommands();
   }
-  return result;
+  if (h.startsWith('/roles')) {
+    document.querySelector('.links a[data-r="roles"]')?.classList.add('active');
+    return renderRoles();
+  }
+  document.querySelector('.links a[data-r="home"]')?.classList.add('active');
+  return renderHome();
 }
 
-// دالة حراسة: إذا مو أدمن بالسيرفر، يرفض وميكمل أي شي
-async function requireAdminInGuild(guild, userId) {
-  const status = await getMemberRoleStatus(guild, userId);
-  if (!status.inGuild) {
-    return { ok: false, reason: 'أنت لست عضواً في هذا السيرفر.' };
-  }
-  if (!status.isAdmin) {
-    return { ok: false, reason: 'عذراً، هذا النظام مخصص للأدمن فقط. كعضو عادي لا يمكنك استخدامه.' };
-  }
-  return { ok: true, member: status.member };
-}
-
-// إيجاد أفضل روم تلقائي للسجلات في السيرفر
-function findAutoLogChannel(guild) {
-  if (!guild || !guild.members.me) return null;
-  const textChannels = guild.channels.cache.filter(c =>
-    c.type === ChannelType.GuildText &&
-    c.permissionsFor(guild.members.me)?.has([
-      PermissionsBitField.Flags.ViewChannel,
-      PermissionsBitField.Flags.SendMessages,
-      PermissionsBitField.Flags.EmbedLinks
-    ])
-  );
-  if (!textChannels.size) return null;
-
-  const preferred = textChannels.find(c => /^(logs?|log|audit|سجل|السجلات|لوق)/i.test(c.name));
-  return preferred || textChannels.first();
-}
-
-// تجهيز وتشغيل السجلات تلقائياً على السيرفر
-function autoSetupGuildLogs(guild, settingsStore) {
-  if (!guild) return {};
-  const current = settingsStore[guild.id] || {};
-  const autoCh = findAutoLogChannel(guild);
-  const updated = { ...current };
-
-  for (const t of LOG_TYPES) {
-    const existing = updated[t.key];
-    const validExistingChannel = existing?.channel_id && guild.channels.cache.has(existing.channel_id);
-
-    if (validExistingChannel) {
-      updated[t.key] = {
-        enabled: existing.enabled !== false,
-        channel_id: existing.channel_id
-      };
-    } else if (autoCh) {
-      updated[t.key] = {
-        enabled: true,
-        channel_id: autoCh.id
-      };
-    } else {
-      updated[t.key] = {
-        enabled: false,
-        channel_id: null
-      };
-    }
-  }
-
-  settingsStore[guild.id] = updated;
-  return updated;
-}
-
-function initLogs(client) {
-  const store = loadSettings();
-
-  const setupAllGuilds = () => {
-    for (const guild of client.guilds.cache.values()) {
-      autoSetupGuildLogs(guild, store);
-    }
-    saveSettings(store);
-  };
-
-  if (client.isReady()) {
-    setupAllGuilds();
-  } else {
-    client.once('clientReady', setupAllGuilds);
-  }
-
-  client.on('guildCreate', guild => {
-    autoSetupGuildLogs(guild, store);
-    saveSettings(store);
-  });
-
-  async function sendLog(guild, typeKey, embed) {
-    if (!guild) return;
-    let guildCfg = store[guild.id];
-    if (!guildCfg) {
-      guildCfg = autoSetupGuildLogs(guild, store);
-      saveSettings(store);
-    }
-
-    let cfg = guildCfg[typeKey];
-    if (!cfg || !cfg.channel_id || !guild.channels.cache.has(cfg.channel_id)) {
-      guildCfg = autoSetupGuildLogs(guild, store);
-      saveSettings(store);
-      cfg = guildCfg[typeKey];
-    }
-
-    if (!cfg || cfg.enabled === false || !cfg.channel_id) return;
-
-    const channel = guild.channels.cache.get(cfg.channel_id);
-    if (!channel || channel.type !== ChannelType.GuildText) return;
-
-    try {
-      await channel.send({ embeds: [embed] });
-    } catch {
-      // تجاهل خطأ الإرسال إذا البوت ما يملك صلاحية بهذا الروم
-    }
-  }
-
-  client.on('messageDelete', async message => {
-    if (!message.guild || message.author?.bot) return;
-    const embed = new EmbedBuilder()
-      .setColor(0xed4245)
-      .setTitle('🗑️ تم حذف رسالة')
-      .addFields(
-        { name: 'الكاتب', value: message.author ? `${message.author.tag} (${message.author.id})` : 'غير معروف', inline: true },
-        { name: 'الروم', value: message.channel ? `<#${message.channel.id}>` : 'غير معروف', inline: true },
-        { name: 'المحتوى', value: message.content ? message.content.slice(0, 1024) : '*لا يوجد نص (قد تكون صورة أو مرفق)*' }
-      )
-      .setTimestamp();
-    await sendLog(message.guild, 'messageDelete', embed);
-  });
-
-  client.on('messageUpdate', async (oldMsg, newMsg) => {
-    if (!newMsg.guild || newMsg.author?.bot) return;
-    if (oldMsg.content === newMsg.content) return;
-    const embed = new EmbedBuilder()
-      .setColor(0xfaa61a)
-      .setTitle('✏️ تم تعديل رسالة')
-      .addFields(
-        { name: 'الكاتب', value: `${newMsg.author.tag} (${newMsg.author.id})`, inline: true },
-        { name: 'الروم', value: `<#${newMsg.channel.id}>`, inline: true },
-        { name: 'قبل التعديل', value: (oldMsg.content || '*غير متوفر*').slice(0, 1024) },
-        { name: 'بعد التعديل', value: (newMsg.content || '*غير متوفر*').slice(0, 1024) }
-      )
-      .setTimestamp();
-    await sendLog(newMsg.guild, 'messageUpdate', embed);
-  });
-
-  client.on('voiceStateUpdate', async (oldState, newState) => {
-    const guild = newState.guild || oldState.guild;
-    const user = newState.member?.user || oldState.member?.user;
-    if (!guild || !user || user.bot) return;
-
-    let desc = null;
-    if (!oldState.channelId && newState.channelId) {
-      desc = `📥 دخل <@${user.id}> إلى الروم الصوتي <#${newState.channelId}>`;
-    } else if (oldState.channelId && !newState.channelId) {
-      desc = `📤 خرج <@${user.id}> من الروم الصوتي <#${oldState.channelId}>`;
-    } else if (oldState.channelId && newState.channelId && oldState.channelId !== newState.channelId) {
-      desc = `🔀 انتقل <@${user.id}> من <#${oldState.channelId}> إلى <#${newState.channelId}>`;
-    }
-    if (!desc) return;
-
-    const embed = new EmbedBuilder()
-      .setColor(0x5865f2)
-      .setTitle('🔊 تحديث الرومات الصوتية')
-      .setDescription(desc)
-      .setTimestamp();
-    await sendLog(guild, 'voiceStateUpdate', embed);
-  });
-
-  client.on('guildMemberAdd', async member => {
-    const embed = new EmbedBuilder()
-      .setColor(0x3ba55d)
-      .setTitle('📥 دخول عضو جديد')
-      .setDescription(`انضم <@${member.id}> (${member.user.tag}) إلى السيرفر.`)
-      .setTimestamp();
-    await sendLog(member.guild, 'memberJoinLeave', embed);
-  });
-
-  client.on('guildMemberRemove', async member => {
-    const embed = new EmbedBuilder()
-      .setColor(0x9aa1b0)
-      .setTitle('📤 خروج عضو')
-      .setDescription(`غادر <@${member.id}> (${member.user?.tag || member.id}) السيرفر.`)
-      .setTimestamp();
-    await sendLog(member.guild, 'memberJoinLeave', embed);
-  });
-
-  client.on('guildBanAdd', async ban => {
-    const embed = new EmbedBuilder()
-      .setColor(0xed4245)
-      .setTitle('🔨 تم حظر عضو')
-      .setDescription(`تم حظر **${ban.user.tag}** (${ban.user.id})${ban.reason ? `\n**السبب:** ${ban.reason}` : ''}.`)
-      .setTimestamp();
-    await sendLog(ban.guild, 'memberBan', embed);
-  });
-
-  client.on('guildBanRemove', async ban => {
-    const embed = new EmbedBuilder()
-      .setColor(0x3ba55d)
-      .setTitle('🔓 تم فك الحظر عن عضو')
-      .setDescription(`تم فك الحظر عن **${ban.user.tag}** (${ban.user.id}).`)
-      .setTimestamp();
-    await sendLog(ban.guild, 'memberBan', embed);
-  });
-
-  client.on('guildMemberUpdate', async (oldMember, newMember) => {
-    const guild = newMember.guild;
-    if (oldMember.nickname !== newMember.nickname) {
-      const embed = new EmbedBuilder()
-        .setColor(0x5865f2)
-        .setTitle('🏷️ تغيير اسم مستعار')
-        .addFields(
-          { name: 'العضو', value: `<@${newMember.id}>`, inline: true },
-          { name: 'القديم', value: oldMember.nickname || '*بدون*', inline: true },
-          { name: 'الجديد', value: newMember.nickname || '*بدون*', inline: true }
-        )
-        .setTimestamp();
-      await sendLog(guild, 'memberUpdate', embed);
-    }
-
-    const oldRoles = new Set(oldMember.roles.cache.keys());
-    const newRoles = new Set(newMember.roles.cache.keys());
-    const added = [...newRoles].filter(id => !oldRoles.has(id));
-    const removed = [...oldRoles].filter(id => !newRoles.has(id));
-
-    if (added.length || removed.length) {
-      const lines = [];
-      if (added.length) lines.push(`➕ تمت إضافة: ${added.map(id => `<@&${id}>`).join(', ')}`);
-      if (removed.length) lines.push(`➖ تمت إزالة: ${removed.map(id => `<@&${id}>`).join(', ')}`);
-      const embed = new EmbedBuilder()
-        .setColor(0x5865f2)
-        .setTitle('🎭 تحديث رتب عضو')
-        .setDescription(`العضو: <@${newMember.id}>\n${lines.join('\n')}`)
-        .setTimestamp();
-      await sendLog(guild, 'memberUpdate', embed);
-    }
-  });
-
-  client.on('channelCreate', async channel => {
-    if (!channel.guild) return;
-    const embed = new EmbedBuilder()
-      .setColor(0x3ba55d)
-      .setTitle('📁 تم إنشاء روم')
-      .setDescription(`الروم: <#${channel.id}> (${channel.name})`)
-      .setTimestamp();
-    await sendLog(channel.guild, 'channelUpdate', embed);
-  });
-
-  client.on('channelDelete', async channel => {
-    if (!channel.guild) return;
-    const embed = new EmbedBuilder()
-      .setColor(0xed4245)
-      .setTitle('🗑️ تم حذف روم')
-      .setDescription(`اسم الروم المحذوف: **${channel.name}** (${channel.id})`)
-      .setTimestamp();
-    await sendLog(channel.guild, 'channelUpdate', embed);
-  });
-
-  client.on('roleCreate', async role => {
-    const embed = new EmbedBuilder()
-      .setColor(0x3ba55d)
-      .setTitle('🎭 تم إنشاء رتبة')
-      .setDescription(`الرتبة: <@&${role.id}> (${role.name})`)
-      .setTimestamp();
-    await sendLog(role.guild, 'roleUpdate', embed);
-  });
-
-  client.on('roleDelete', async role => {
-    const embed = new EmbedBuilder()
-      .setColor(0xed4245)
-      .setTitle('🗑️ تم حذف رتبة')
-      .setDescription(`اسم الرتبة المحذوفة: **${role.name}** (${role.id})`)
-      .setTimestamp();
-    await sendLog(role.guild, 'roleUpdate', embed);
-  });
-}
-
-module.exports = {
-  LOG_TYPES,
-  loadSettings,
-  saveSettings,
-  getMemberRoleStatus,
-  getUserGuildsWithRoles,
-  requireAdminInGuild,
-  initLogs
-};
+window.addEventListener('hashchange', route);
+route();
+</script>
+</body>
+</html>
