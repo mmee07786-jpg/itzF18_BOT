@@ -2,570 +2,435 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ItzF18 Bot - لوحة التحكم</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>itzF18 BOT — شرح البوت والأوامر</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#0a0c11; --surface:#11141b; --surface2:#171b24; --border:#1f2531;
-  --text:#eef0f4; --muted:#9aa1b0; --primary:#5865F2; --primary-h:#4752c4;
-  --green:#3ba55d; --red:#ed4245; --orange:#faa61a;
-}
-*{box-sizing:border-box;margin:0;padding:0;font-family:"Segoe UI",Tahoma,Arial,sans-serif}
+:root{--void:#07070a;--ink:#101015;--line:#24242c;--bone:#f1efe9;--mute:#9b9ba8;--red:#e11d2e;--ice:#22d3ee;--blue:#3b9bff}
+*{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+body{background:var(--void);color:var(--bone);font-family:Tajawal,Tahoma,sans-serif;line-height:1.8;min-height:100vh;overflow-x:hidden}
 a{color:inherit;text-decoration:none}
-button{font-family:inherit;cursor:pointer}
+button{font:inherit;cursor:pointer;color:inherit}
+:focus-visible{outline:2px solid var(--ice);outline-offset:3px}
+.disp{font-family:Lalezar,Tajawal,sans-serif;font-weight:400}
 
-/* الشريط العلوي */
-nav{position:sticky;top:0;z-index:20;background:rgba(10,12,17,.92);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
-.nav-in{max-width:1000px;margin:auto;padding:12px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.logo{font-weight:800;font-size:18px;color:#fff;display:flex;align-items:center;gap:8px}
-.logo b{color:var(--primary)}
-.links{display:flex;gap:4px;flex:1;flex-wrap:wrap}
-.links a{padding:7px 12px;border-radius:8px;color:var(--muted);font-size:14px;font-weight:600}
-.links a:hover,.links a.active{background:var(--surface2);color:#fff}
-.nav-r{display:flex;gap:8px;align-items:center}
+/* الشريط العلوي: رابط الدعوة */
+nav{position:sticky;top:0;z-index:30;background:rgba(7,7,10,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav-in{max-width:1040px;margin:auto;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{font-size:24px;letter-spacing:.5px;direction:ltr}
+.logo i{color:var(--red);font-style:normal}
+.invite{background:var(--red);color:#fff;padding:9px 20px;font-weight:700;font-size:14px;border-radius:4px;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);transition:background .2s}
+.invite:hover{background:#ff3347}
 
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 16px;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:#fff;font-size:14px;font-weight:700;transition:.15s}
-.btn:hover{background:#202533}
-.btn.primary{background:var(--primary);border-color:var(--primary)}
-.btn.primary:hover{background:var(--primary-h)}
-.btn.green{background:var(--green);border-color:var(--green)}
-.btn.sm{padding:6px 11px;font-size:12px}
-.btn[disabled]{opacity:.5;cursor:not-allowed}
+/* الواجهة */
+.hero{position:relative;text-align:center;padding:110px 18px 90px;overflow:hidden}
+.hero:before{content:"";position:absolute;left:50%;top:48%;width:780px;height:780px;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(225,29,46,.32),transparent 62%);pointer-events:none}
+.hero h1{position:relative;font-size:clamp(54px,13vw,128px);line-height:1;direction:ltr;letter-spacing:1px}
+.hero h1 span{color:var(--red)}
+.hero p.sub{position:relative;max-width:520px;margin:16px auto 30px;color:var(--mute);font-size:17px}
+.what{position:relative;display:inline-flex;align-items:center;gap:10px;background:var(--bone);color:var(--void);border:0;padding:16px 34px;font-size:19px;font-weight:700;clip-path:polygon(14px 0,100% 0,calc(100% - 14px) 100%,0 100%);transition:background .2s,transform .2s}
+.what:hover{background:var(--ice);transform:translateY(-2px)}
+.dev-line{position:relative;margin-top:26px;color:var(--mute);font-size:15px}
 
-main{max-width:1000px;margin:auto;padding:24px 16px 60px}
-
-/* الرئيسية */
-.hero{text-align:center;padding:50px 10px 30px}
-.hero h1{font-size:34px;font-weight:800;margin-bottom:10px}
-.hero h1 b{color:var(--primary)}
-.hero p{color:var(--muted);max-width:560px;margin:0 auto 22px;font-size:15px}
-.hero .cta{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
-.stats{display:flex;gap:12px;justify-content:center;margin:26px 0;flex-wrap:wrap}
-.stat{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 26px;text-align:center;min-width:140px}
-.stat b{display:block;font-size:24px;color:#fff}
-.stat span{font-size:12px;color:var(--muted)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px}
-.card h3{font-size:16px;margin-bottom:6px}
-.card p{font-size:13px;color:var(--muted)}
-.sec-title{font-size:20px;font-weight:800;margin:34px 0 14px}
+.btns{position:relative;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.what.alt{background:transparent;color:var(--bone);box-shadow:inset 0 0 0 2px var(--bone)}
+.what.alt:hover{background:var(--red);box-shadow:inset 0 0 0 2px var(--red);color:#fff}
+.rise{opacity:0;transform:translateY(28px);animation:rise .9s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:var(--d,0s)}
+@keyframes rise{to{opacity:1;transform:none}}
+.rv{opacity:0;transform:translateY(26px) scale(.97);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.2,1);transition-delay:var(--d,0s)}
+.rv.in{opacity:1;transform:none}
+.ov{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.78);backdrop-filter:blur(6px)}
+.ov.on{display:flex}
+.ov.on .sheet{animation:pop .5s cubic-bezier(.2,.8,.2,1)}
+@keyframes pop{from{opacity:0;transform:translateY(30px) scale(.94)}}
+.demo{margin:6px 0 16px}
+.bar{background:#000;border:1px solid rgba(34,211,238,.4);padding:11px 14px;font-family:Consolas,monospace;font-size:16px;color:#e8fbff;min-height:46px;text-align:left;direction:ltr}
+.caret{display:inline-block;width:2px;height:1.1em;background:var(--ice);vertical-align:-3px;margin-left:2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.sug{direction:ltr;text-align:left;background:#0b1a20;border:1px solid var(--line);border-top:0}
+.sug div{padding:7px 14px;font-size:14px;color:#d8e8ec;border-bottom:1px solid rgba(34,211,238,.12)}
+.sug b{font-family:Consolas,monospace;color:var(--ice);margin-right:10px}
+.steps{margin:0 0 12px;padding-inline-start:22px;color:#d8e8ec}
+.steps li{border:0;padding:4px 0}
+.steps li:before{content:none}
+.tip{font-size:14px;color:#9fc7d0;margin-bottom:16px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.rise,.rv{opacity:1;transform:none;animation:none;transition:none}.body{animation:none}.caret{animation:none}.ov.on .sheet{animation:none}}
 
 /* الأوامر */
-.toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
-input[type=text],select{background:var(--surface);border:1px solid var(--border);color:#fff;border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit;width:100%}
-input[type=text]:focus,select:focus{outline:none;border-color:var(--primary)}
-.toolbar input{flex:2;min-width:180px}.toolbar select{flex:1;min-width:150px}
-.cmd{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;margin-bottom:10px}
-.cmd-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.cmd-name{font-family:Consolas,monospace;font-weight:700;color:#fff;background:var(--surface2);padding:3px 10px;border-radius:7px;direction:ltr}
-.badge{font-size:11px;padding:2px 8px;border-radius:20px;background:#3a2a10;color:var(--orange);font-weight:700}
-.cmd p{color:#c9cdd6;font-size:14px;margin-top:8px}
-.opts{margin-top:8px;display:flex;flex-direction:column;gap:3px}
-.opt{font-size:12.5px;color:var(--muted)}
-.opt code{color:#c3c8ff;background:var(--surface2);padding:1px 6px;border-radius:5px;direction:ltr;display:inline-block}
-.cat-title{font-size:15px;font-weight:800;margin:22px 0 10px;color:#dfe2ff}
+main{max-width:1040px;margin:auto;padding:0 18px 70px}
+h2.t{font-size:38px;margin:10px 0 6px}
+.lead{color:var(--mute);max-width:640px;margin-bottom:22px}
+.how{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:0;border:1px solid var(--line);margin-bottom:34px}
+.how div{padding:18px 20px;border-inline-start:1px solid var(--line)}
+.how div:first-child{border-inline-start:0}
+.how b{display:block;font-size:17px;margin-bottom:2px}
+.how span{color:var(--mute);font-size:14px}
+.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.q{flex:1;min-width:200px;background:var(--ink);border:1px solid var(--line);color:var(--bone);padding:11px 14px;font:inherit;font-size:15px;border-radius:0}
+.q:focus{outline:none;border-color:var(--ice)}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.tab{background:transparent;border:1px solid var(--line);padding:6px 14px;font-size:14px;transition:.15s}
+.tab small{color:var(--mute);margin-inline-start:6px;font-size:12px}
+.tab:hover{border-color:var(--mute)}
+.tab[aria-pressed=true]{background:var(--red);border-color:var(--red);color:#fff}
+.tab[aria-pressed=true] small{color:#ffd5d9}
+.count{color:var(--mute);font-size:14px;margin:6px 0 14px}
+.cmds{display:flex;flex-direction:column;gap:10px}
+.cmd{background:var(--ink);border:1px solid var(--line);border-inline-start:4px solid var(--ice);transition:border-color .2s,background .2s}
+.cmd.adm{border-inline-start-color:var(--red)}
+.cmd.own{border-inline-start-color:#ffcc4d}
+.cmd[open]{background:#14141b;border-color:#34343f}
+.cmd summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px 16px;flex-wrap:wrap}
+.cmd summary::-webkit-details-marker{display:none}
+.cmd summary:hover{background:rgba(255,255,255,.03)}
+.cmd-n{font-family:Consolas,monospace;font-size:18px;font-weight:700;direction:ltr;min-width:150px;text-align:left}
+.who{font-size:12px;padding:1px 10px;border:1px solid;white-space:nowrap}
+.who.m{color:var(--ice);border-color:var(--ice)}
+.who.a{color:#ff6b78;border-color:#ff6b78}
+.who.o{color:#ffcc4d;border-color:#ffcc4d}
+.sd{flex:1;min-width:200px;color:#cfcfd8;font-size:14.5px}
+.chev{width:10px;height:10px;border-inline-end:2px solid var(--mute);border-bottom:2px solid var(--mute);transform:rotate(45deg);transition:transform .25s;margin-inline-start:auto}
+.cmd[open] .chev{transform:rotate(-135deg)}
+.body{padding:2px 18px 18px;border-top:1px dashed var(--line);animation:drop .35s ease}
+@keyframes drop{from{opacity:0;transform:translateY(-8px)}}
+.body h4{font-size:15px;color:var(--ice);margin:16px 0 6px}
+.perm{margin-top:14px;font-size:14px;color:var(--mute)}
+.perm b{color:var(--bone);font-weight:500;border-bottom:1px solid var(--red)}
+.ot{width:100%;border-collapse:collapse;font-size:14px}
+.ot td{padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+.ot td:first-child{font-family:Consolas,monospace;direction:ltr;text-align:left;color:#c9e9ff;white-space:nowrap;width:1%}
+.ot td:nth-child(2){white-space:nowrap;width:1%;font-size:12.5px}
+.rq{color:#ff6b78}.op{color:var(--mute)}
+.body ol{padding-inline-start:22px;color:#d8d8e0;font-size:14.5px}
+.body ol li{padding:2px 0}
+.body ol code,.nt code{font-family:Consolas,monospace;direction:ltr;display:inline-block;background:#000;padding:0 7px;color:#c9e9ff;font-size:13px}
+.exw{display:flex;gap:8px;margin-top:14px;align-items:stretch}
+.exw code{flex:1;display:block;background:#000;border:1px solid var(--line);padding:9px 12px;direction:ltr;text-align:left;color:#c9e9ff;font-family:Consolas,monospace;font-size:13.5px;overflow-x:auto;white-space:nowrap}
+.cp{background:transparent;border:1px solid var(--ice);color:var(--ice);padding:0 16px;font-size:13px;transition:.15s}
+.cp:hover{background:var(--ice);color:#021015}
+.nt{margin-top:12px;font-size:14px;color:#ffd08a;border-inline-start:3px solid #ffd08a;padding:2px 12px}
+.empty{padding:34px 10px;text-align:center;color:var(--mute)}
+.dcs{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.dc{background:transparent;border:1px solid var(--blue);color:var(--blue);padding:5px 16px;font-size:14px;transition:.15s}
+.dc:hover{background:var(--blue);color:#04101c}
+.dc b{font-family:Consolas,monospace;font-weight:700;direction:ltr;display:inline-block}
+#toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,30px);background:var(--bone);color:var(--void);padding:10px 22px;font-weight:700;opacity:0;pointer-events:none;transition:.3s;z-index:200}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+footer{border-top:1px solid var(--line);text-align:center;padding:30px 18px 40px;color:var(--mute);font-size:15px}
+.dev{color:var(--blue);font-weight:700;border-bottom:2px solid var(--blue);transition:color .2s}
+.dev:hover{color:#8cc6ff}
 
-/* قائمة السيرفرات */
-.srv{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px}
-.srv img,.srv .ph{width:46px;height:46px;border-radius:50%;background:var(--surface2);flex-shrink:0;object-fit:cover}
-.srv .ph{display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--muted)}
-.srv .nm{flex:1;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.srv .nm small{display:block;font-weight:600;font-size:11.5px;color:var(--muted);margin-top:1px}
-.role{font-size:11px;padding:2px 9px;border-radius:20px;font-weight:700;white-space:nowrap}
-.role.owner{background:#3a2e10;color:#ffd166}
-.role.admin{background:#1d2a4d;color:#9fb0ff}
-.role.manage{background:#14352a;color:#6fdc8c}
+/* العرض السينمائي */
+#intro{position:fixed;inset:0;z-index:100;display:none;background:#efede6}
+#intro.on{display:block}
+#fx{position:absolute;inset:0;width:100%;height:100%}
+#panel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:18px;opacity:0;pointer-events:none;transition:opacity .7s}
+#panel.show{opacity:1;pointer-events:auto}
+.sheet{width:min(620px,100%);max-height:92vh;overflow:auto;background:rgba(5,16,20,.88);backdrop-filter:blur(8px);border:1px solid var(--ice);padding:28px 26px;box-shadow:0 0 70px rgba(34,211,238,.25)}
+.sheet h3{font-size:38px;color:var(--ice);direction:ltr;text-align:right;line-height:1.2;margin-bottom:10px}
+.sheet p{color:#d8e8ec;margin-bottom:10px;font-size:16px}
+.sheet ul{list-style:none;margin:8px 0 14px}
+.sheet li{padding:5px 0;border-bottom:1px solid rgba(34,211,238,.18);font-size:15px}
+.sheet li:before{content:"◆";color:var(--red);margin-inline-end:10px;font-size:11px}
+.sheet .by{margin:14px 0 18px;font-size:16px}
+.close{background:var(--ice);color:#021015;border:0;padding:10px 26px;font-weight:700}
 
-/* تنبيهات */
-.note{background:#14202e;border:1px solid #23415f;color:#a9cdee;border-radius:12px;padding:12px 14px;font-size:13px;margin-bottom:16px;line-height:1.8}
-.warnbox{background:#2b2110;border:1px solid #5b4416;color:#ffd08a;border-radius:12px;padding:12px 14px;font-size:13px;margin:16px auto;line-height:1.9;max-width:600px;text-align:right}
-.warnbox code,.note code{background:#000;padding:2px 8px;border-radius:6px;direction:ltr;display:inline-block;word-break:break-all;color:#c3c8ff;user-select:all}
-details.help{max-width:600px;margin:18px auto 0;text-align:right;color:var(--muted);font-size:13px}
-details.help summary{cursor:pointer;color:#c3c8ff;font-weight:700}
-details.help ol{margin:10px 22px;line-height:2}
-.copy{margin-inline-start:6px}
-
-/* لوحة السيرفر */
-.back{display:inline-block;margin-bottom:14px;color:var(--muted);font-size:14px}
-.g-head{display:flex;align-items:center;gap:12px;margin-bottom:18px}
-.g-head img{width:54px;height:54px;border-radius:50%}
-.g-head h2{font-size:21px}
-.panel{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:14px}
-.panel h3{font-size:15px;margin-bottom:10px}
-.quick{display:flex;gap:8px;flex-wrap:wrap}
-.quick select{flex:1;min-width:180px}
-.log{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:10px}
-.log.err{border-color:#5a2226}
-.log-h{display:flex;align-items:center;justify-content:space-between;gap:10px}
-.log-t{font-weight:800;font-size:15px}
-.log-d{font-size:12.5px;color:var(--muted);margin:3px 0 10px}
-.log-c{display:flex;gap:8px;flex-wrap:wrap}
-.log-c select{flex:1;min-width:180px}
-.st{font-size:12.5px;margin-top:8px;min-height:0}
-.st.bad{color:#ff7b7e}.st.good{color:#6fdc8c}.st.warn{color:var(--orange)}
-
-.switch{position:relative;width:46px;height:26px;flex-shrink:0}
-.switch input{display:none}
-.switch span{position:absolute;inset:0;background:#2a303d;border-radius:26px;transition:.2s}
-.switch span:before{content:"";position:absolute;width:20px;height:20px;top:3px;right:3px;background:#fff;border-radius:50%;transition:.2s}
-.switch input:checked+span{background:var(--green)}
-.switch input:checked+span:before{right:23px}
-
-.savebar{position:sticky;bottom:0;background:linear-gradient(transparent,var(--bg) 40%);padding:16px 0 4px;margin-top:10px}
-.savebar .btn{width:100%;padding:13px;font-size:15px}
-
-.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border);padding:11px 20px;border-radius:10px;font-size:14px;z-index:50;box-shadow:0 8px 30px rgba(0,0,0,.5);max-width:92vw}
-.toast.ok{border-color:var(--green)}.toast.bad{border-color:var(--red)}
-.center{text-align:center;padding:50px 10px;color:var(--muted)}
-.user-chip{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
-.user-chip img{width:28px;height:28px;border-radius:50%}
-footer{text-align:center;color:#5b6272;font-size:12px;padding:30px 0}
 </style>
 </head>
 <body>
+
 <nav>
   <div class="nav-in">
-    <a class="logo" href="#/">⚡ <span>ItzF18 <b>Bot</b></span></a>
-    <div class="links">
-      <a href="#/" data-r="home">الرئيسية</a>
-      <a href="#/commands" data-r="commands">الأوامر</a>
-      <a href="#/dashboard" data-r="dashboard">لوحة التحكم</a>
-    </div>
-    <div class="nav-r" id="navr"></div>
+    <a class="logo disp" href="#top">itzF18 <i>BOT</i></a>
+    <a class="invite" id="inv" href="#" target="_blank" rel="noopener">أضف البوت لسيرفرك</a>
   </div>
 </nav>
 
-<main id="app"><div class="center">جاري التحميل...</div></main>
-<footer>ItzF18 Bot © لوحة التحكم</footer>
+<header class="hero" id="top">
+  <h1 class="disp rise" style="--d:.1s">itzF18 <span>BOT</span></h1>
+  <p class="sub rise" style="--d:.35s">شرح كامل لأوامر البوت، وكيف يستخدمها العضو وكيف يستخدمها الإداري.</p>
+  <div class="btns rise" style="--d:.6s">
+    <button class="what" id="whatBtn" type="button">ما هو itzF18 BOT؟</button>
+    <button class="what alt" id="guideBtn" type="button">كيف أستخدم الأوامر؟</button>
+  </div>
+  <div class="dev-line rise" style="--d:.85s">المطوّر: فهد — <a class="dev" href="https://www.tiktok.com/@demon_a771?" target="_blank" rel="noopener">itzF18</a></div>
+  <div class="dcs rise" style="--d:1s" data-dcs></div>
+</header>
+
+<main>
+  <h2 class="t disp">شرح الأوامر</h2>
+  <p class="lead">كل أمر هنا من أوامر البوت الفعلية. اضغط على أي أمر يفتح لك خياراته وخطوات استخدامه ومثال جاهز تنسخه.</p>
+
+  <div class="how">
+    <div><b>1. اكتب /</b><span>في خانة الرسالة، وتظهر لك قائمة أوامر البوت.</span></div>
+    <div><b>2. اختر الأمر</b><span>اضغط على الأمر أو كمل كتابة اسمه.</span></div>
+    <div><b>3. عبّي الخيارات</b><span>الخيارات المطلوبة تظهر تلقائياً، ثم اضغط Enter.</span></div>
+  </div>
+
+  <div class="tools">
+    <input class="q" id="q" type="search" placeholder="ابحث عن أمر... مثل ban أو رايد أو متجر" aria-label="بحث في الأوامر">
+  </div>
+  <div class="tabs" id="tabs" role="group" aria-label="أقسام الأوامر"></div>
+  <div class="tabs" id="whoTabs" role="group" aria-label="نوع المستخدم"></div>
+  <div class="count" id="count"></div>
+  <div class="cmds" id="list"></div>
+</main>
+
+<footer>
+  تم تطوير البوت بواسطة فهد — <a class="dev" href="https://www.tiktok.com/@demon_a771?" target="_blank" rel="noopener">itzF18</a>
+  <div class="dcs" data-dcs></div>
+</footer>
+
+<!-- العرض السينمائي + الشرح -->
+<div id="intro" role="dialog" aria-modal="true" aria-label="ما هو itzF18 BOT">
+  <canvas id="fx"></canvas>
+  <div id="panel">
+    <div class="sheet">
+      <h3 class="disp">What is itzF18 BOT?</h3>
+      <p>itzF18 BOT بوت ديسكورد عربي يساعدك تدير سيرفرك بدون تعقيد: ينظّم الرايدات، يراقب السيرفر، ويرد على أعضائك.</p>
+      <ul>
+        <li>الرايدات والتوبات: إعلان الرايد وتسجيل النتائج ولوحات التوب 10 و20.</li>
+        <li>الإشراف: طرد وباند وتايم أوت، وكلمات ممنوعة مع عقوبة تلقائية.</li>
+        <li>الترحيب والمغادرة وشكر البوست برسائل مخصصة.</li>
+        <li>اقتصاد عملة أورا: جائزة يومية ومتجر لكل سيرفر.</li>
+        <li>ترجمة فورية: ضع علم دولة على أي رسالة وتنترجم.</li>
+        <li>فحص تفاعل ونسخ احتياطي واستعادة لبنية السيرفر.</li>
+      </ul>
+      <p class="by">المطوّر: فهد — <a class="dev" href="https://www.tiktok.com/@demon_a771?" target="_blank" rel="noopener">itzF18</a></p>
+      <div class="dcs" data-dcs style="justify-content:flex-start;margin:0 0 16px"></div>
+      <button class="close" id="closeBtn" type="button">إغلاق</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" role="status"></div>
+<div class="ov" id="guide" role="dialog" aria-modal="true" aria-label="كيف أستخدم الأوامر">
+  <div class="sheet">
+    <h3 class="disp" style="font-size:34px;direction:rtl">كيف أستخدم الأوامر؟</h3>
+    <div class="demo"><div class="bar"><span id="typed"></span><i class="caret"></i></div><div class="sug" id="sug"></div></div>
+    <ol class="steps">
+      <li>اكتب <b dir="ltr">/</b> في خانة الرسالة داخل أي روم يقدر البوت يشوفه.</li>
+      <li>تظهر قائمة أوامر البوت: اضغط على الأمر اللي تبيه أو كمل كتابة اسمه.</li>
+      <li>عبّي الخيارات: المطلوبة أولاً، وتنقل بينها بزر Tab.</li>
+      <li>اضغط Enter وانتظر رد البوت.</li>
+    </ol>
+    <p class="tip">أوامر "للإداري" تظهر فقط لمن عنده صلاحية. وإذا ما ظهرت أوامر البوت، تأكد إنه داخل السيرفر وعنده صلاحية استخدام الأوامر.</p>
+    <button class="close" id="gClose" type="button">فهمت</button>
+  </div>
+</div>
 
 <script>
+/* ═════════ إعدادات سهلة التعديل ═════════ */
 const CLIENT_ID = "1546817538149711922";
 const INVITE = "https://discord.com/oauth2/authorize?client_id=" + CLIENT_ID + "&permissions=8&integration_type=0&scope=bot";
-const app = document.getElementById('app');
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+document.getElementById('inv').href = INVITE;
 
-/*
-  وضعين للتشغيل (يتحدد تلقائياً):
-  - backend: الموقع مفتوح من سيرفر البوت نفسه (فيه /api)، تسجيل الدخول يمر عبر السيرفر.
-  - static : الموقع على استضافة ثابتة مثل GitHub Pages. تسجيل الدخول يتم من المتصفح مباشرة عبر ديسكورد (OAuth2 implicit)
-             بدون أي سيرفر، ويتعرف على حسابك وسيرفراتك اللي أنت فيها مالك/أدمن/إدارة سيرفر.
-*/
-let mode = 'static';
-let me = { loggedIn: false };
+/* ═════════ الأوامر (مأخوذة من ملفات البوت) ═════════
+   who: m = للجميع ، a = للإداري ، o = لمنشئ البوت فقط */
+const CATS={mod:'الإشراف',raids:'الرايدات',tops:'التوبات وملفات الأعضاء',greet:'الترحيب والمغادرة والبوست',eco:'اقتصاد أورا والمتجر',act:'الفعاليات والترجمة',sys:'النسخ والنظام'};
+const MEM=['member',1,'العضو: اكتب @ ثم اسمه'],RSN=['reason',0,'السبب'];
+const COMMANDS=[];
+const C=(c,n,who,perm,d,opts,ex,note,steps)=>COMMANDS.push({c,n,who,perm,d,opts:opts||[],ex,note,steps});
 
-/* ═══════════ تخزين آمن (sessionStorage) ═══════════ */
-const store = {
-  get(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } },
-  set(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} },
-  del(k) { try { sessionStorage.removeItem(k); } catch (e) {} }
-};
+/* الإشراف */
+C('mod','/warn','a','Kick Members','يحذّر العضو، وإذا وصل 5 تحذيرات ينطرد تلقائياً ويرجع عداده صفر.',[MEM,RSN],'/warn member:@أحمد reason:سب في الشات','التحذيرات تنحفظ بذاكرة البوت، فتتصفر إذا انعاد تشغيله.');
+C('mod','/clear_warnings','a','Kick Members','يصفّر تحذيرات العضو.',[MEM],'/clear_warnings member:@أحمد');
+C('mod','/kick','a','Kick Members','يطرد العضو من السيرفر، ويقدر يرجع بدعوة جديدة.',[MEM,RSN],'/kick member:@أحمد reason:مخالفة القوانين');
+C('mod','/ban','a','Ban Members','يحظر العضو من السيرفر نهائياً.',[MEM,RSN],'/ban member:@أحمد reason:نشر روابط');
+C('mod','/unban','a','Ban Members','يرفع الحظر عن عضو باستخدام الآيدي.',[['user_id',1,'آيدي الحساب (أرقام)'],RSN],'/unban user_id:123456789012345678','تستخدم الآيدي لأن المحظور مو داخل السيرفر عشان تمنشنه.');
+C('mod','/timeout','a','Moderate Members','يسكّت العضو مؤقتاً: ما يقدر يكتب ولا يتكلم لين تخلص المدة.',[MEM,['time_input',1,'المدة: 5 أو 10m أو 1h أو 1d'],RSN],'/timeout member:@أحمد time_input:10m reason:سبام');
+C('mod','/untimeout','a','Moderate Members','يلغي التايم أوت عن العضو قبل ما تخلص مدته.',[MEM,RSN],'/untimeout member:@أحمد');
+C('mod','/mute','a','Mute Members','يكتم العضو صوتياً (Server Mute) في الرومات الصوتية.',[MEM,RSN],'/mute member:@أحمد reason:صراخ','يشتغل على العضو وهو داخل روم صوتي.');
+C('mod','/unmute','a','Mute Members','يلغي الكتم الصوتي عن العضو.',[MEM,RSN],'/unmute member:@أحمد');
+C('mod','/clear','a','Manage Messages','يحذف عدد من رسائل الروم الحالي (من 1 إلى 1000).',[['amount',1,'عدد الرسائل بين 1 و1000']],'/clear amount:50','يحذف الرسائل حتى عمر 30 يوم. اللي أقدم من 14 يوم تنحذف واحدة واحدة فتاخذ وقت أطول. يشتغل بالرومات النصية فقط.');
 
-/* رابط الرجوع (Redirect URI): لازم يتضاف بنفس الشكل بالضبط بـ Discord Developer Portal → OAuth2 → Redirects */
-const REDIRECT_URI = location.origin + location.pathname.replace(/index\.html$/, '');
+/* الرايدات */
+C('raids','/raid-start','a','Administrator','ينشر إعلان رايد جاهز مع @here وزر دخول وزر لوحة المتصدرين.',[],'/raid-start','الإعلان يستخدم اسم الكلان ولونه وصورته من الأوامر name_clan و color_emed و set-img-raid-start. إذا كتبت الرابط بدون https يكمله البوت.',
+ ['اكتب <code>/raid-start</code> وستفتح لك نافذة.','عبّي: Server Link (رابط السيرفر)، Difficulty (الصعوبة)، Targets / Matchup (الأهداف)، Our Count & Their Count (الأعداد)، Region (المنطقة).','اضغط إرسال، وينزل الإعلان بالروم.','زر Join يدخل الرايد، وزر Leaderboard يعرض أكثر المشاركين نشاطاً (يظهر لمن يضغط فقط).']);
+C('raids','/set-img-raid-start','a','Administrator','يحفظ صورة أو GIF تطلع تحت كل إعلان رايد بشكل دائم.',[['image',1,'الصورة أو الـ GIF (ارفعها كمرفق)']],'/set-img-raid-start image:banner.gif','الحد الأقصى 8MB، والصيغ المدعومة PNG و JPG و GIF و WEBP. يرسل لك معاينة بعد الحفظ.');
+C('raids','/name_clan','a','Administrator','يغيّر اسم الكلان الظاهر بإعلانات الرايد.',[['name',0,'اسم الكلان الجديد']],'/name_clan name:VLX');
+C('raids','/color_emed','a','Administrator','يغيّر لون شريط إعلان الرايد.',[['hex_code',1,'كود اللون مثل #FF0000']],'/color_emed hex_code:#8B0000','لو كتبت كود غلط يرد عليك البوت ويطلب صيغة صحيحة.');
+C('raids','/end-raid','a','Administrator','ينهي الرايد وينشر التقرير ويضيف رايد لكل MVP ويحدّث لوحات التوب.',[],'/end-raid','الإداري العادي ينتظر 3 ساعات بين كل استخدام وآخر بنفس السيرفر. زر المتابعة يشتغل 10 دقائق فقط، وإذا انتهت اكتب /end-raid من جديد.',
+ ['اكتب <code>/end-raid</code> وتفتح نافذة النتائج.','عبّي: RAID Number (رقم الرايد)، ENEMY (العدو)، ALLY (الحليف)، DURATION (المدة)، STATUS (الحالة أو السبب).','اضغط الزر <b>متابعة (MVPs &amp; Media)</b> اللي يرسله لك البوت.','اكتب منشنات الـ MVPs، وارفق رابط صورة الإثبات (أو اكتب skip لو ما فيه).','ينزل Raid Report بالروم مع Win Streak، وتزيد رايدات كل MVP.']);
+C('raids','/raid-mentions','a','Administrator','ينشر قائمة منشنات الرايد على شكل Embed مرتب.',[['mentions_content',1,'المنشنات اللي تبي تنشرها']],'/raid-mentions mentions_content:@أحمد @سعد @خالد');
+C('raids','/raid-list','m','بدون صلاحية','يعرض أكثر 50 عضو مشاركين بالرايدات.',[],'/raid-list','يظهر للجميع بالروم.');
+C('raids','/raid-add','a','Administrator','يزيد عدد رايدات عضو، أو ينقص منه إذا كتبت رقم بالسالب.',[MEM,['amount',1,'الكمية (سالب للخصم)']],'/raid-add member:@أحمد amount:3');
+C('raids','/raid-set','a','Administrator','يحدد عدد رايدات العضو مباشرة برقم تختاره.',[MEM,['amount',1,'العدد الجديد']],'/raid-set member:@أحمد amount:25');
+C('raids','/raid-reset','a','Administrator','يصفّر رايدات عضو واحد، أو الجميع.',[['member',0,'العضو (اتركه فاضي لتصفير الجميع)']],'/raid-reset member:@أحمد','إذا ما اخترت عضو يصفّر نقاط كل الأعضاء، فانتبه.');
 
-function toast(msg, type) {
-  document.querySelectorAll('.toast').forEach(t => t.remove());
-  const t = document.createElement('div');
-  t.className = 'toast ' + (type || '');
-  t.textContent = msg;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 4200);
+/* التوبات */
+C('tops','/set-top10-channel','a','Administrator','يحدد الروم اللي تنعرض فيه لوحة توب 10، وتتحدث تلقائياً بعد كل رايد.',[['channel',1,'روم اللوحة']],'/set-top10-channel channel:#توب-10');
+C('tops','/set-top20-channel','a','Administrator','يحدد روم لوحة المراكز من 11 إلى 20.',[['channel',1,'روم اللوحة']],'/set-top20-channel channel:#توب-20');
+C('tops','/avatar-roblox-top','a','Administrator','يحط صورة مخصصة لمركز معين بلوحة التوب.',[],'/avatar-roblox-top','تنحط الصورة وتتطبق على اللوحة مباشرة.',
+ ['اكتب <code>/avatar-roblox-top</code> وتفتح نافذة.','اكتب رقم التوب من 1 إلى 20.','اكتب رابط صورة، أو يوزر روبلوكس، أو الآيدي الرقمي.','اضغط إرسال.']);
+C('tops','/set-avatar-remove','a','Administrator','يحذف الصورة المخصصة لمركز معين ويرجع الأفتار الأصلي.',[['top_number',1,'رقم التوب']],'/set-avatar-remove top_number:3');
+C('tops','/set-roblox','m','بدون صلاحية','يربط يوزر روبلوكس حقك ليظهر بلوحة التوب.',[['username',1,'يوزر روبلوكس']],'/set-roblox username:itzF18');
+C('tops','/set-roblox-user','a','Administrator','يربط يوزر روبلوكس لعضو ثاني.',[MEM,['username',1,'يوزر روبلوكس']],'/set-roblox-user member:@أحمد username:Ahmed123');
+C('tops','/set-country','a','Administrator','يحدد دولة العضو لتظهر بلوحة التوب.',[MEM,['country_value',1,'اسم الدولة']],'/set-country member:@أحمد country_value:السعودية');
+
+/* الترحيب والمغادرة والبوست */
+[['welcome','الترحيب','تنرسل لما ينضم عضو جديد','للمنشن','رابط الصورة'],['leave','المغادرة','تنرسل لما يغادر عضو','لاسم العضو','رابط الصورة أو GIF'],['boost','البوست','تنرسل لما أحد يسوي Boost للسيرفر','للمنشن','رابط الصورة']].forEach(([k,ar,when,ph,img])=>{
+  C('greet',`/${k}_setup`,'a','Administrator',`يحدد الروم اللي تنرسل فيه رسائل ${ar}.`,[['channel',1,'الروم النصي']],`/${k}_setup channel:#${k==='welcome'?'الترحيب':k==='leave'?'المغادرة':'البوست'}`);
+  C('greet',`/${k}_message`,'a','Administrator',`يعدّل نص رسالة ${ar} (${when}).`,[['message',1,'النص الجديد، واكتب {member} '+ph]],`/${k}_message message:هلا {member} نورت السيرفر`,'اكتب {member} بالضبط وهو يتبدل باسم العضو.');
+  C('greet',`/${k}_image`,'a','Administrator',`يغيّر صورة رسالة ${ar}.`,[['image_url',1,img]],`/${k}_image image_url:https://i.imgur.com/example.gif`,'لازم الرابط يبدأ بـ http أو https.');
+  C('greet',`/test_${k}`,'a','Administrator',`يجرّب رسالة ${ar} عليك أنت قبل ما تنزل للأعضاء.`,[],`/test_${k}`);
+});
+
+/* الاقتصاد */
+C('eco','/daily','m','بدون صلاحية','تستلم 500 أورا جائزة يومية، وتنعاد كل 24 ساعة.',[],'/daily','إذا استلمت قبل كذا يقول لك كم باقي من الوقت.');
+C('eco','/balance','m','بدون صلاحية','يعرض رصيدك من عملة أورا، أو رصيد عضو ثاني.',[['member',0,'العضو (اتركه فاضي لرصيدك)']],'/balance','الرصيد واحد بكل السيرفرات اللي فيها البوت.');
+C('eco','/store','m','بدون صلاحية','يعرض سلع متجر هذا السيرفر بأسعارها ووصفها.',[],'/store','كل سيرفر له متجره الخاص.');
+C('eco','/buy','m','بدون صلاحية','يشتري سلعة من متجر السيرفر ويخصم سعرها من رصيدك.',[['item_name',1,'اسم السلعة كما يظهر بـ /store']],'/buy item_name:رتبة VIP','شوف الأسماء من /store أول، والبحث ما يفرّق بين الحروف الكبيرة والصغيرة.');
+C('eco','/store_add','a','Administrator','يضيف سلعة جديدة لمتجر هذا السيرفر فقط.',[['item_name',1,'اسم السلعة'],['price',1,'السعر بأورا'],['description',1,'وصف السلعة'],['image_url',0,'رابط صورة السلعة']],'/store_add item_name:رتبة VIP price:2000 description:رتبة مميزة');
+C('eco','/store_remove','a','Administrator','يحذف سلعة من متجر هذا السيرفر.',[['item_name',1,'اسم السلعة']],'/store_remove item_name:رتبة VIP');
+C('eco','/give','o','منشئ البوت فقط','يضيف أورا لرصيد عضو.',[MEM,['amount',1,'الكمية (أكبر من صفر)']],'/give member:@أحمد amount:1000');
+C('eco','/take_money','o','منشئ البوت فقط','يسحب أورا من عضو، وإذا طلبت أكثر من رصيده يسحب كل اللي عنده.',[MEM,['amount',1,'الكمية']],'/take_money member:@أحمد amount:500');
+
+/* الفعاليات والترجمة */
+C('act','/set_activity_role','a','Administrator','يحفظ الرتبة اللي تنعطى لمن يفوز بفعالية فحص التفاعل.',[['role',1,'الرتبة']],'/set_activity_role role:@نشط','شغّل هذا الأمر مرة وحدة قبل /activity_check.');
+C('act','/activity_check','a','Administrator','يبدأ فحص تفاعل سريع: أول من يتفاعل خلال 5 ثواني ياخذ الرتبة المحفوظة.',[],'/activity_check','لازم للبوت صلاحية Manage Roles، ورتبته تكون أعلى من رتبة الفعالية. إذا ما تحددت رتبة يطلب منك /set_activity_role.',
+ ['حدد الرتبة مرة وحدة بـ <code>/set_activity_role</code>.','اكتب <code>/activity_check</code>، وينزل Embed مع @everyone.','يضغط الأعضاء على التفاعل تحت الرسالة خلال 5 ثواني.','يعطيهم البوت الرتبة، ويعرض قائمة المتفاعلين.']);
+C('act','تفاعل علم 🇺🇸','m','بدون أمر','ترجمة فورية: حط علم دولة على أي رسالة وينترجم نصها للغة تلك الدولة.',[],'تفاعل 🇺🇸 على الرسالة','الأعلام العربية (🇸🇦 🇮🇶 🇪🇬 🇦🇪 وغيرها) للعربي، 🇺🇸 🇬🇧 للإنجليزي، 🇫🇷 فرنسي، 🇪🇸 إسباني، 🇩🇪 ألماني، 🇹🇷 تركي، 🇮🇷 فارسي، 🇷🇺 روسي، 🇮🇹 إيطالي، 🇨🇳 صيني، 🇯🇵 ياباني، 🇰🇷 كوري، 🇧🇷 🇵🇹 برتغالي، 🇮🇳 هندي، 🇵🇰 أوردو.',
+ ['افتح الرسالة اللي تبي تترجمها.','اضغط على تفاعل (Reaction) واختر علم الدولة.','ينزل البوت ترجمة داخل Embed بعنوان "الترجمة الفورية".']);
+
+/* النسخ والنظام */
+C('sys','/backup','o','منشئ البوت فقط','ياخذ نسخة احتياطية من السيرفر: الرتب والأقسام والرومات وصلاحياتها.',[],'/backup','بعد ما ينتهي يعرض لك عدد الرتب والأقسام والرومات اللي انحفظت.');
+C('sys','/restore','o','منشئ البوت فقط','يستعيد بنية السيرفر من آخر نسخة محفوظة له.',[],'/restore','إذا ما فيه نسخة محفوظة لهذا السيرفر يبلغك. ينتهي بتقرير بنتيجة الاستعادة.');
+C('sys','/sync','o','منشئ البوت فقط','يزامن أوامر البوت يدوياً إذا ما ظهرت أو تغيرت.',[],'/sync');
+
+/* ═════════ عرض الأوامر ═════════ */
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.08});
+const WHO={m:'للجميع',a:'للإداري',o:'لمنشئ البوت'};
+let cur='all',curWho='all',qv='';
+const stepsOf=x=>x.steps||[`اكتب <code>${esc(x.n)}</code> في أي روم واختره من القائمة.`,...x.opts.filter(o=>o[1]).map(o=>`عبّي الخيار <code>${esc(o[0])}</code>.`),...(x.opts.some(o=>!o[1])?['أضف الخيارات الاختيارية إذا تحتاجها.']:[]),'اضغط Enter.'];
+function drawTabs(){
+  const cats=[['all','الكل',COMMANDS.length],...Object.entries(CATS).map(([k,v])=>[k,v,COMMANDS.filter(x=>x.c===k).length])];
+  const t=document.getElementById('tabs');
+  t.innerHTML=cats.map(([k,v,n])=>`<button class="tab" type="button" data-k="${k}" aria-pressed="${k===cur}">${v}<small>${n}</small></button>`).join('');
+  t.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{cur=b.dataset.k;drawTabs();drawList();});
+  const w=document.getElementById('whoTabs');
+  w.innerHTML=[['all','كل المستخدمين'],['m','للجميع'],['a','للإداري'],['o','لمنشئ البوت']].map(([k,v])=>`<button class="tab" type="button" data-k="${k}" aria-pressed="${k===curWho}">${v}</button>`).join('');
+  w.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{curWho=b.dataset.k;drawTabs();drawList();});
 }
-
-async function api(path, body) {
-  const opts = { credentials: 'same-origin', headers: {} };
-  if (body !== undefined) {
-    opts.method = 'POST';
-    opts.headers['Content-Type'] = 'application/json';
-    opts.headers['X-Requested-With'] = 'dashboard';
-    opts.body = JSON.stringify(body);
-  }
-  const res = await fetch(path, opts);
-  const ct = res.headers.get('content-type') || '';
-  if (!ct.includes('application/json')) { const e = new Error('NO_BACKEND'); e.noBackend = true; throw e; }
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) { const e = new Error(typeof data.error === 'object' && data.error ? (data.error.ar || data.error.en) : (data.error || ('HTTP ' + res.status))); e.status = res.status; throw e; }
-  return data;
+function card(x){
+  const tbl=x.opts.length?`<h4>الخيارات</h4><table class="ot">${x.opts.map(o=>`<tr><td>${esc(o[0])}</td><td class="${o[1]?'rq':'op'}">${o[1]?'مطلوب':'اختياري'}</td><td>${esc(o[2])}</td></tr>`).join('')}</table>`:'';
+  return `<details class="cmd ${x.who==='a'?'adm':x.who==='o'?'own':''}">
+    <summary><span class="cmd-n">${esc(x.n)}</span><span class="who ${x.who}">${WHO[x.who]}</span><span class="sd">${esc(x.d)}</span><i class="chev"></i></summary>
+    <div class="body">
+      <div class="perm">الصلاحية المطلوبة: <b>${esc(x.perm)}</b></div>
+      ${tbl}
+      <h4>كيف تستخدمه</h4><ol>${stepsOf(x).map(t=>`<li>${t}</li>`).join('')}</ol>
+      <div class="exw"><code>${esc(x.ex)}</code><button class="cp" type="button" data-t="${esc(x.ex)}">نسخ</button></div>
+      ${x.note?`<p class="nt">${esc(x.note)}</p>`:''}
+    </div></details>`;
 }
-
-/* ═══════════ تسجيل الدخول المباشر (وضع static) ═══════════ */
-function startLogin() {
-  const bytes = new Uint8Array(16);
-  crypto.getRandomValues(bytes);
-  const state = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
-  store.set('oauth_state', state);
-  const url = 'https://discord.com/oauth2/authorize?' + new URLSearchParams({
-    client_id: CLIENT_ID,
-    response_type: 'token',
-    redirect_uri: REDIRECT_URI,
-    scope: 'identify guilds',
-    state: state
-  });
-  location.href = url;
+function drawList(){
+  const q=qv.trim().toLowerCase();
+  const items=COMMANDS.filter(x=>(cur==='all'||x.c===cur)&&(curWho==='all'||x.who===curWho)&&(!q||x.n.toLowerCase().includes(q)||x.d.includes(q)||x.opts.some(o=>o[0].includes(q))));
+  document.getElementById('count').textContent=items.length?`عدد الأوامر المعروضة: ${items.length}`:'';
+  const L=document.getElementById('list');
+  L.innerHTML=items.length?items.map(card).join(''):'<div class="empty">ما لقيت أمر بهذا الاسم. جرّب كلمة ثانية أو غيّر القسم.</div>';
+  L.querySelectorAll('.cmd').forEach((el,i)=>{el.classList.add('rv');el.style.setProperty('--d',Math.min(i,6)*.05+'s');io.observe(el);});
 }
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),2200);}
+async function copy(txt,msg){
+  try{await navigator.clipboard.writeText(txt);}catch(e){const a=document.createElement('textarea');a.value=txt;document.body.appendChild(a);a.select();try{document.execCommand('copy');}catch(_){}a.remove();}
+  toast(msg);
+}
+document.getElementById('list').addEventListener('click',e=>{const b=e.target.closest('.cp');if(b)copy(b.dataset.t,'تم نسخ المثال');});
+document.getElementById('q').addEventListener('input',e=>{qv=e.target.value;drawList();});
+/* حسابات ديسكورد */
+const DISCORD=['itzf18','fahad_ttl'];
+document.querySelectorAll('[data-dcs]').forEach(el=>{el.innerHTML=DISCORD.map(u=>`<button class="dc" type="button" data-u="${u}">ديسكورد: <b>${u}</b></button>`).join('');});
+document.addEventListener('click',e=>{const b=e.target.closest('.dc');if(b)copy(b.dataset.u,'تم نسخ يوزر ديسكورد: '+b.dataset.u);});
+drawTabs();drawList();
+document.querySelectorAll('.how div,h2.t,.lead').forEach((el,i)=>{el.classList.add('rv');el.style.setProperty('--d',(i%4)*.08+'s');io.observe(el);});
 
-/* يقرأ رد ديسكورد من الرابط (التوكن يجي بعد # والأخطاء بعد ?) */
-function consumeOAuthResponse() {
-  const hash = location.hash.replace(/^#/, '');
-  const q = new URLSearchParams(location.search);
-  const cleanTo = (h) => history.replaceState(null, '', location.pathname + (h || '#/'));
+/* ═════════ العرض السينمائي (مثل الفيديو) ═════════ */
+const intro=document.getElementById('intro'),panel=document.getElementById('panel'),cv=document.getElementById('fx'),c=cv.getContext('2d');
+let raf=0;
+const clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const ease=t=>1-Math.pow(1-t,3);
+const hex=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16));
+const mix=(a,b,t)=>{const A=hex(a),B=hex(b);return 'rgb('+A.map((v,i)=>Math.round(lerp(v,B[i],t))).join(',')+')';};
 
-  if (q.get('error')) {
-    const e = q.get('error');
-    cleanTo('#/dashboard');
-    toast(e === 'access_denied' ? 'تم إلغاء تسجيل الدخول.' : 'فشل تسجيل الدخول: ' + (q.get('error_description') || e), 'bad');
-    return;
-  }
+function play(){
+  cancelAnimationFrame(raf);
+  panel.classList.remove('show');
+  intro.classList.add('on');
+  document.body.style.overflow='hidden';
+  if(matchMedia('(prefers-reduced-motion:reduce)').matches){intro.style.background='#04141a';c.clearRect(0,0,cv.width,cv.height);panel.classList.add('show');document.getElementById('closeBtn').focus();return;}
+  intro.style.background='';
+  const d=Math.min(devicePixelRatio||1,2),W=cv.width=innerWidth*d,H=cv.height=innerHeight*d;
+  const cx=W/2,cy=H*0.42,R=Math.min(W,H)*0.2;
+  const P=Array.from({length:140},(_,i)=>{const a=i/140*6.283,rr=R*(1+Math.random()*.35);return{x:Math.random()*W,y:Math.random()*H,tx:cx+Math.cos(a)*rr,ty:cy+Math.sin(a)*rr,s:(5+Math.random()*13)*d,r:Math.random()*6,red:Math.random()<.45,dl:Math.random()*.6}});
+  const t0=performance.now();
+  const starPath=(r,rot)=>{c.beginPath();for(let i=0;i<16;i++){const rr=i%2?r*.3:r,a=i/16*6.283+rot;const x=cx+Math.cos(a)*rr,y=cy+Math.sin(a)*rr;i?c.lineTo(x,y):c.moveTo(x,y);}c.closePath();};
 
-  if (hash.includes('access_token=')) {
-    const p = new URLSearchParams(hash);
-    const saved = store.get('oauth_state');
-    store.del('oauth_state');
-    if (!p.get('state') || p.get('state') !== saved) {
-      cleanTo('#/dashboard');
-      toast('طلب تسجيل الدخول غير صالح، جرّب مرة ثانية.', 'bad');
-      return;
+  function frame(now){
+    const t=(now-t0)/1000;
+    /* الخلفية: أبيض ← أحمر داكن ← أزرق داكن */
+    const k1=ease(clamp((t-2.4)/1.1)),k2=ease(clamp((t-3.9)/1.1));
+    const bg=mix(mix('#efede6','#1a0508',k1),'#03161c',k2);
+    c.fillStyle=bg;c.fillRect(0,0,W,H);
+    const fg=mix(mix('#0b0b0f','#f1efe9',k1),'#e8fbff',k2);
+    const ac=mix('#e11d2e','#22d3ee',k2);
+
+    /* القطع تتجمع حول النجمة */
+    for(const p of P){
+      const k=ease(clamp((t-p.dl)/1.5));
+      const x=lerp(p.x,p.tx,k),y=lerp(p.y,p.ty,k);
+      c.save();c.translate(x,y);c.rotate(p.r+t*(1-k)*3);
+      c.fillStyle=p.red?ac:fg;c.fillRect(-p.s/2,-p.s/2,p.s,p.s);c.restore();
     }
-    const expires = Date.now() + (Number(p.get('expires_in')) || 3600) * 1000;
-    store.set('dc_token', p.get('access_token'));
-    store.set('dc_expires', String(expires));
-    store.del('dc_profile');
-    cleanTo('#/dashboard');
-  }
-}
-
-async function discord(path, token) {
-  const r = await fetch('https://discord.com/api/v10' + path, { headers: { Authorization: 'Bearer ' + token } });
-  if (r.status === 401) { const e = new Error('unauthorized'); e.code = 401; throw e; }
-  if (r.status === 429) { const e = new Error('rate'); e.code = 429; throw e; }
-  if (!r.ok) throw new Error('HTTP ' + r.status);
-  return r.json();
-}
-
-const P_ADMIN = 0x8n, P_MANAGE = 0x20n;
-function roleOf(g) {
-  if (g.owner) return 'owner';
-  let p = 0n;
-  try { p = BigInt(g.permissions || 0); } catch (e) {}
-  if ((p & P_ADMIN) === P_ADMIN) return 'admin';
-  if ((p & P_MANAGE) === P_MANAGE) return 'manage';
-  return null;
-}
-
-async function loadStaticSession() {
-  const token = store.get('dc_token');
-  const exp = Number(store.get('dc_expires') || 0);
-  if (!token || exp < Date.now()) { store.del('dc_token'); store.del('dc_expires'); store.del('dc_profile'); return { loggedIn: false }; }
-
-  // نخزن البروفايل دقيقتين عشان ما نتعدى حد الطلبات لو أعاد المستخدم تحميل الصفحة
-  let profile = null;
-  try { const c = JSON.parse(store.get('dc_profile') || 'null'); if (c && Date.now() - c.ts < 120000) profile = c; } catch (e) {}
-
-  if (!profile) {
-    try {
-      const [u, g] = await Promise.all([discord('/users/@me', token), discord('/users/@me/guilds', token)]);
-      profile = { ts: Date.now(), u, g };
-      store.set('dc_profile', JSON.stringify(profile));
-    } catch (e) {
-      if (e.code === 401) { store.del('dc_token'); store.del('dc_expires'); store.del('dc_profile'); return { loggedIn: false }; }
-      if (e.code === 429) { toast('طلبات كثيرة لديسكورد، انتظر شوي وحدّث الصفحة.', 'bad'); return { loggedIn: false }; }
-      toast('تعذر الاتصال بديسكورد.', 'bad');
-      return { loggedIn: false };
+    /* النجمة الشائكة */
+    const s=ease(clamp((t-1.2)/1));
+    if(s>0){
+      starPath(R*.9*s,t*.35);c.fillStyle=fg;c.fill();c.lineWidth=4*d;c.strokeStyle=ac;c.stroke();
+      c.beginPath();c.arc(cx,cy,R*.13*s,0,6.283);c.fillStyle=ac;c.fill();
     }
-  }
-
-  const order = { owner: 0, admin: 1, manage: 2 };
-  const guilds = (profile.g || [])
-    .map(x => ({ id: x.id, name: x.name, icon: x.icon ? `https://cdn.discordapp.com/icons/${x.id}/${x.icon}.png` : null, role: roleOf(x) }))
-    .filter(x => x.role)
-    .sort((a, b) => (order[a.role] - order[b.role]) || a.name.localeCompare(b.name));
-
-  return {
-    loggedIn: true, loginEnabled: true,
-    user: { id: profile.u.id, username: profile.u.username, globalName: profile.u.global_name || null, avatar: profile.u.avatar || null },
-    guilds, staticMode: true
-  };
-}
-
-function logout() {
-  store.del('dc_token'); store.del('dc_expires'); store.del('dc_profile');
-  me = { loggedIn: false };
-  renderNav();
-  location.hash = '#/';
-  route();
-}
-
-/* ───── الشريط العلوي ───── */
-function renderNav() {
-  const r = document.getElementById('navr');
-  const invite = `<a class="btn primary sm" href="${INVITE}" target="_blank" rel="noopener">➕ إضافة البوت</a>`;
-  if (me.loggedIn) {
-    const av = me.user.avatar ? `<img src="https://cdn.discordapp.com/avatars/${esc(me.user.id)}/${esc(me.user.avatar)}.png?size=64" alt="">` : '';
-    const out = mode === 'static' ? `<button class="btn sm" id="logoutBtn">خروج</button>` : `<a class="btn sm" href="/logout">خروج</a>`;
-    r.innerHTML = `${invite}<div class="user-chip">${av}<span>${esc(me.user.globalName || me.user.username)}</span></div>${out}`;
-    const lb = document.getElementById('logoutBtn');
-    if (lb) lb.onclick = logout;
-  } else {
-    r.innerHTML = `${invite}<a class="btn sm" href="/login" id="loginBtn">تسجيل الدخول</a>`;
-    const b = document.getElementById('loginBtn');
-    if (b && mode === 'static') b.onclick = ev => { ev.preventDefault(); startLogin(); };
-  }
-}
-
-/* ───── الرئيسية ───── */
-async function renderHome() {
-  app.innerHTML = `
-    <section class="hero">
-      <h1>بوت <b>ItzF18</b> لإدارة سيرفرك</h1>
-      <p>سجلات متقدمة، حماية، رايدات وتوبات، رتب تلقائية، وذكاء اصطناعي. تحكم بكل شي من الموقع.</p>
-      <div class="cta">
-        <a class="btn primary" href="${INVITE}" target="_blank" rel="noopener">➕ إضافة البوت لسيرفرك</a>
-        <a class="btn" href="#/dashboard">🎛️ لوحة التحكم</a>
-      </div>
-    </section>
-    <div class="stats" id="stats"></div>
-    <div class="sec-title">المميزات</div>
-    <div class="grid">
-      <div class="card"><h3>📜 سجلات السيرفر</h3><p>حذف وتعديل الرسائل، الرومات الصوتية، الطرد والباند والتايم أوت مع اسم المنفذ والسبب. كل سيرفر بإعداداته المستقلة.</p></div>
-      <div class="card"><h3>⚔️ الرايدات والتوبات</h3><p>إعلان الرايد، تسجيل النتائج، لوحة توب 10 و 20 تتحدث تلقائياً، ورتب حسب عدد الرايدات.</p></div>
-      <div class="card"><h3>🛡️ الحماية</h3><p>كلمات ممنوعة مع تحذيرات وعقوبة تلقائية (طرد، باند، تايم أوت) تحددها أنت.</p></div>
-      <div class="card"><h3>👋 الترحيب والبوست</h3><p>رسائل ترحيب ومغادرة وشكر البوست بصور ورسائل مخصصة.</p></div>
-      <div class="card"><h3>🤖 ذكاء اصطناعي</h3><p>منشن البوت ويقرأ الصور والفيديوهات ويكتب الأكواد كملفات.</p></div>
-      <div class="card"><h3>💾 النسخ الاحتياطي</h3><p>نسخ واستعادة بنية السيرفر بخطوات بسيطة.</p></div>
-    </div>`;
-  if (mode !== 'backend') return;
-  try {
-    const s = await api('/api/stats');
-    document.getElementById('stats').innerHTML =
-      `<div class="stat"><b>${s.guilds}</b><span>سيرفر</span></div><div class="stat"><b>${s.members.toLocaleString('en')}</b><span>عضو</span></div>`;
-  } catch (e) {}
-}
-
-/* ───── الأوامر ───── */
-async function renderCommands() {
-  if (mode !== 'backend') {
-    app.innerHTML = `<div class="center"><h2 style="color:#fff;margin-bottom:10px">📖 شرح الأوامر</h2>
-      <div class="note" style="max-width:560px;margin:auto">قائمة الأوامر تنجلب من سيرفر البوت، وهذا الموقع شغّال بوضع الاستضافة الثابتة (مثل GitHub Pages). افتح الموقع من رابط سيرفر البوت عشان تظهر.</div></div>`;
-    return;
-  }
-  app.innerHTML = '<div class="center">جاري تحميل الأوامر...</div>';
-  let cmds;
-  try { cmds = (await api('/api/commands')).commands; }
-  catch (e) { app.innerHTML = '<div class="center">❌ تعذر تحميل الأوامر.</div>'; return; }
-
-  const CAT = { raids:'⚔️ الرايدات والتوبات', moderation:'🛡️ الإشراف', greet:'👋 الترحيب والمغادرة والبوست', tickets:'🎫 التكت', activity:'📊 النشاط', backup:'💾 النسخ الاحتياطي', other:'✨ أخرى' };
-  const catName = c => CAT[c] || c;
-  const cats = [...new Set(cmds.map(c => c.category))];
-  app.innerHTML = `
-    <div class="sec-title" style="margin-top:6px">📖 شرح الأوامر</div>
-    <div class="toolbar">
-      <input type="text" id="q" placeholder="ابحث عن أمر...">
-      <select id="cat"><option value="">كل الأقسام</option>${cats.map(c => `<option value="${esc(c)}">${esc(catName(c))}</option>`).join('')}</select>
-    </div>
-    <div id="list"></div>`;
-
-  const draw = () => {
-    const q = document.getElementById('q').value.trim().toLowerCase();
-    const cat = document.getElementById('cat').value;
-    const shown = cmds.filter(c => (!cat || c.category === cat) &&
-      (!q || c.name.toLowerCase().includes(q) || c.description.toLowerCase().includes(q)));
-    if (!shown.length) { document.getElementById('list').innerHTML = '<div class="center">ما فيه نتائج.</div>'; return; }
-
-    let html = '';
-    for (const c of [...new Set(shown.map(x => x.category))]) {
-      html += `<div class="cat-title">${esc(catName(c))}</div>`;
-      for (const x of shown.filter(s => s.category === c)) {
-        html += `<div class="cmd"><div class="cmd-h"><span class="cmd-name">/${esc(x.name)}</span>${x.adminOnly ? '<span class="badge">للإدارة</span>' : ''}</div>
-          <p>${esc(x.description)}</p>
-          ${x.options.length ? '<div class="opts">' + x.options.map(o => `<div class="opt"><code>${esc(o.name)}</code> ${o.required ? '(مطلوب)' : '(اختياري)'} — ${esc(o.description)}</div>`).join('') + '</div>' : ''}</div>`;
+    /* السلسلة */
+    const ca=clamp((t-1.8)/.8);
+    if(ca>0){
+      c.globalAlpha=ca;c.lineWidth=7*d;c.strokeStyle=mix(mix('#55555f','#c9ccd4',k1),'#7be8ff',k2);
+      const x0=-W*.1,y0=H*.82,x1=W*1.1,y1=H*.2,dx=x1-x0,dy=y1-y0,len=Math.hypot(dx,dy),ang=Math.atan2(dy,dx),gap=44*d,off=(t*130*d)%(gap*2);
+      for(let i=-2;i*gap<len;i++){
+        const u=i*gap+off,wob=Math.sin(u*.006+t*2)*26*d;
+        const x=x0+Math.cos(ang)*u-Math.sin(ang)*wob,y=y0+Math.sin(ang)*u+Math.cos(ang)*wob;
+        c.beginPath();c.ellipse(x,y,(i%2?15:26)*d,13*d,ang,0,6.283);c.stroke();
       }
+      c.globalAlpha=1;
     }
-    document.getElementById('list').innerHTML = html;
-  };
-  document.getElementById('q').oninput = draw;
-  document.getElementById('cat').onchange = draw;
-  draw();
-}
-
-/* ───── لوحة التحكم: قائمة السيرفرات ───── */
-const ROLE_LABEL = { owner: '👑 مالك السيرفر', admin: '🛡️ أدمن (Administrator)', manage: '⚙️ إدارة السيرفر (Manage Server)' };
-
-async function renderDashboard() {
-  if (!me.loggedIn) {
-    const staticHelp = mode === 'static' ? `
-      <details class="help"><summary>طلعلك خطأ Invalid OAuth2 redirect_uri؟ اضغط هنا</summary>
-        <ol>
-          <li>افتح <b>discord.com/developers/applications</b> واختر تطبيق البوت.</li>
-          <li>من القائمة: <b>OAuth2</b> ← قسم <b>Redirects</b> ← <b>Add Redirect</b>.</li>
-          <li>الصق هذا الرابط <b>بالضبط</b> (مع الشرطة بالنهاية) واضغط <b>Save Changes</b>:<br>
-            <code id="ru">${esc(REDIRECT_URI)}</code> <button class="btn sm copy" id="cp">نسخ</button></li>
-          <li>ارجع هنا واضغط تسجيل الدخول.</li>
-        </ol></details>` : '';
-    const off = mode === 'backend' && me.loginEnabled === false
-      ? `<div class="warnbox">تسجيل الدخول غير مفعّل بسيرفر البوت: لازم يتضاف <code>CLIENT_SECRET</code> بمتغيرات البيئة.<br>وأضف هذا الرابط بـ Redirects: <code>${esc(me.redirectUri || '')}</code></div>` : '';
-    app.innerHTML = `<div class="center"><h2 style="color:#fff;margin-bottom:10px">🔐 سجّل دخول بحساب ديسكورد</h2>
-      <p style="margin-bottom:18px">عشان نتعرف على حسابك وسيرفراتك اللي أنت أدمن فيها.</p>
-      ${off || '<a class="btn primary" href="/login" id="loginMain">تسجيل الدخول بديسكورد</a>'}${staticHelp}</div>`;
-    const lm = document.getElementById('loginMain');
-    if (lm && mode === 'static') lm.onclick = ev => { ev.preventDefault(); startLogin(); };
-    const cp = document.getElementById('cp');
-    if (cp) cp.onclick = async () => { try { await navigator.clipboard.writeText(REDIRECT_URI); toast('تم نسخ الرابط ✅', 'ok'); } catch (e) { toast('انسخه يدوياً من المربع.', 'bad'); } };
-    return;
+    if(t>4.7&&!panel.classList.contains('show')){panel.classList.add('show');document.getElementById('closeBtn').focus();}
+    raf=requestAnimationFrame(frame);
   }
-
-  const guilds = me.guilds;
-  const note = mode === 'static' ? `<div class="note">✅ تم التعرف على حسابك. هذي السيرفرات اللي أنت فيها <b>مالك أو أدمن أو عندك إدارة السيرفر</b>.<br>إعدادات السيرفر من اللوحة تشتغل لما يتفتح الموقع من سيرفر البوت نفسه.</div>` : '';
-  app.innerHTML = `<div class="sec-title" style="margin-top:6px">🏰 اختر السيرفر</div>${note}
-    ${guilds.length ? '<div class="grid" id="gl"></div>' : '<div class="center">ما عندك سيرفرات تقدر تديرها (تحتاج صلاحية Administrator أو Manage Server).</div>'}`;
-  const gl = document.getElementById('gl');
-  if (!gl) return;
-  gl.innerHTML = guilds.map(g => {
-    const badge = g.role ? `<small><span class="role ${esc(g.role)}">${ROLE_LABEL[g.role]}</span></small>` : '';
-    const action = mode === 'static'
-      ? `<a class="btn green sm" target="_blank" rel="noopener" href="${INVITE}&guild_id=${esc(g.id)}&disable_guild_select=true">إضافة البوت</a>`
-      : (g.botIn ? `<a class="btn primary sm" href="#/dashboard/${esc(g.id)}">إدارة</a>`
-                 : `<a class="btn green sm" target="_blank" rel="noopener" href="${INVITE}&guild_id=${esc(g.id)}&disable_guild_select=true">إضافة</a>`);
-    return `<div class="srv">
-      ${g.icon ? `<img src="${esc(g.icon)}" alt="">` : `<div class="ph">${esc(g.name.charAt(0))}</div>`}
-      <div class="nm">${esc(g.name)}${badge}</div>${action}</div>`;
-  }).join('');
+  raf=requestAnimationFrame(frame);
 }
-
-/* ───── لوحة التحكم: سيرفر محدد (وضع backend فقط) ───── */
-async function renderGuild(id) {
-  if (mode !== 'backend') {
-    app.innerHTML = `<div class="center"><div class="note" style="max-width:560px;margin:auto">إعدادات السيرفر تحتاج تشغيل الموقع من سيرفر البوت.</div><br><a class="btn" href="#/dashboard">رجوع</a></div>`;
-    return;
-  }
-  app.innerHTML = '<div class="center">جاري التحميل...</div>';
-  let d;
-  try { d = await api('/api/guild/' + id); }
-  catch (e) {
-    app.innerHTML = `<div class="center"><p style="color:#ff7b7e;margin-bottom:14px">❌ ${esc(e.message)}</p><a class="btn" href="#/dashboard">رجوع</a></div>`;
-    return;
-  }
-
-  const errMsg = x => (x && typeof x === 'object') ? (x.ar || x.en || '') : (x || '');
-  const logsData = d.logs || { types: d.types, settings: d.settings, errors: d.errors };
-
-  const opts = sel => {
-    const byCat = {};
-    d.channels.forEach(c => (byCat[c.category || 'بدون قسم'] = byCat[c.category || 'بدون قسم'] || []).push(c));
-    let h = '<option value="">— اختر روم —</option>';
-    for (const [cat, list] of Object.entries(byCat)) {
-      h += `<optgroup label="${esc(cat)}">` + list.map(c =>
-        `<option value="${esc(c.id)}" ${c.id === sel ? 'selected' : ''}>#${esc(c.name)}${c.canSend ? '' : ' ⚠️'}</option>`).join('') + '</optgroup>';
-    }
-    return h;
+function stop(){cancelAnimationFrame(raf);intro.classList.remove('on');panel.classList.remove('show');document.body.style.overflow='';document.getElementById('whatBtn').focus();}
+const guide=document.getElementById('guide');let gT=0;
+function guideOpen(){
+  guide.classList.add('on');document.body.style.overflow='hidden';
+  const seq=['/','/b','/ba','/ban','/ban @العضو','/ban @العضو السبب'],ty=document.getElementById('typed'),sg=document.getElementById('sug');let i=0;
+  const step=()=>{
+    const v=seq[i%seq.length];ty.textContent=v;
+    const m=v.includes(' ')?[]:COMMANDS.filter(x=>x.n.startsWith(v)).slice(0,3);
+    sg.innerHTML=m.map(x=>`<div><b>${esc(x.n)}</b>${esc(x.d.slice(0,46))}</div>`).join('');
+    i++;gT=setTimeout(step,i%seq.length===0?2200:900);
   };
-  const chById = Object.fromEntries(d.channels.map(c => [c.id, c]));
-
-  app.innerHTML = `
-    <a class="back" href="#/dashboard">← رجوع للسيرفرات</a>
-    <div class="g-head">${d.guild.icon ? `<img src="${esc(d.guild.icon)}" alt="">` : ''}<h2>${esc(d.guild.name)}</h2></div>
-
-    <div class="panel">
-      <h3>⚡ تعيين روم واحد لكل السجلات</h3>
-      <div class="quick"><select id="allCh">${opts('')}</select><button class="btn" id="applyAll">تطبيق على الكل</button></div>
-    </div>
-
-    <div class="sec-title" style="margin-top:6px">📜 السجلات (Logs)</div>
-    <div id="logs">${logsData.types.map(t => {
-      const s = logsData.settings[t.key] || {};
-      return `<div class="log" data-t="${esc(t.key)}">
-        <div class="log-h"><div class="log-t">${t.icon} ${esc(t.name)}</div>
-          <label class="switch"><input type="checkbox" class="en" ${s.enabled ? 'checked' : ''}><span></span></label></div>
-        <div class="log-d">${esc(t.desc)}</div>
-        <div class="log-c"><select class="ch">${opts(s.channel_id)}</select><button class="btn sm test">🧪 اختبار</button></div>
-        <div class="st"></div></div>`;
-    }).join('')}</div>
-
-    <div class="savebar"><button class="btn primary" id="save">💾 حفظ التغييرات</button></div>`;
-
-  const rows = () => [...document.querySelectorAll('.log')];
-  const setSt = (row, text, cls) => { const el = row.querySelector('.st'); el.textContent = text || ''; el.className = 'st ' + (cls || ''); row.classList.toggle('err', cls === 'bad'); };
-
-  const refreshWarn = row => {
-    const ch = chById[row.querySelector('.ch').value];
-    if (ch && !ch.canSend) setSt(row, '⚠️ ' + errMsg(ch.sendError), 'warn');
-    else if (!row.dataset.keep) setSt(row, '', '');
-  };
-
-  rows().forEach(row => {
-    const t = row.dataset.t;
-    const err = (logsData.errors || {})[t];
-    if (err) { row.dataset.keep = '1'; setSt(row, '❌ آخر خطأ: ' + err.message, 'bad'); }
-    else refreshWarn(row);
-    row.querySelector('.ch').onchange = () => { delete row.dataset.keep; refreshWarn(row); };
-    row.querySelector('.test').onclick = async () => {
-      const chId = row.querySelector('.ch').value;
-      if (!chId) { setSt(row, '❌ اختر روم أول.', 'bad'); return; }
-      setSt(row, '⏳ جاري الاختبار...', '');
-      try {
-        await api('/api/guild/' + id + '/test', { type: t, channel_id: chId });
-        setSt(row, '✅ وصلت رسالة الاختبار بالروم.', 'good');
-      } catch (e) { setSt(row, '❌ ' + e.message, 'bad'); }
-    };
-  });
-
-  document.getElementById('applyAll').onclick = () => {
-    const v = document.getElementById('allCh').value;
-    if (!v) { toast('اختر روم أول.', 'bad'); return; }
-    rows().forEach(r => { r.querySelector('.ch').value = v; r.querySelector('.en').checked = true; delete r.dataset.keep; refreshWarn(r); });
-    toast('تم التعيين، اضغط حفظ لتطبيق التغييرات.');
-  };
-
-  document.getElementById('save').onclick = async () => {
-    const btn = document.getElementById('save');
-    const payload = {};
-    rows().forEach(r => payload[r.dataset.t] = { enabled: r.querySelector('.en').checked, channel_id: r.querySelector('.ch').value || null });
-    for (const v of Object.values(payload)) {
-      if (v.enabled && !v.channel_id) { toast('اختر روم للسجلات المفعّلة.', 'bad'); return; }
-    }
-    btn.disabled = true; btn.textContent = 'جاري الحفظ...';
-    try {
-      const r = await api('/api/guild/' + id + '/logs', { logs: payload });
-      const errs = Object.entries(r.errors || {});
-      rows().forEach(row => { delete row.dataset.keep; setSt(row, '', ''); refreshWarn(row); });
-      errs.forEach(([k, msg]) => { const row = document.querySelector(`.log[data-t="${k}"]`); if (row) { row.dataset.keep = '1'; setSt(row, '❌ ' + errMsg(msg), 'bad'); row.querySelector('.en').checked = false; } });
-      errs.length ? toast(`تم الحفظ، لكن ${errs.length} سجل فيه خطأ (شوف الأحمر).`, 'bad') : toast('✅ تم حفظ الإعدادات.', 'ok');
-    } catch (e) { toast('❌ ' + e.message, 'bad'); }
-    btn.disabled = false; btn.textContent = '💾 حفظ التغييرات';
-  };
+  clearTimeout(gT);step();document.getElementById('gClose').focus();
 }
-
-/* ───── التنقل ───── */
-async function route() {
-  const h = (location.hash || '#/').slice(1);
-  document.querySelectorAll('.links a').forEach(a => a.classList.remove('active'));
-  const mark = r => document.querySelector(`.links a[data-r="${r}"]`)?.classList.add('active');
-  const gm = h.match(/^\/dashboard\/(\d+)$/);
-
-  if (h.startsWith('/commands')) { mark('commands'); return renderCommands(); }
-  if (gm) { mark('dashboard'); if (!me.loggedIn) return renderDashboard(); return renderGuild(gm[1]); }
-  if (h.startsWith('/dashboard')) { mark('dashboard'); return renderDashboard(); }
-  mark('home'); return renderHome();
-}
-
-(async function init() {
-  // 1) نقرأ رد ديسكورد لو راجع من تسجيل الدخول
-  consumeOAuthResponse();
-
-  // 2) نحدد الوضع: هل فيه سيرفر بوت يرد؟
-  try {
-    const r = await api('/api/me');
-    if (r && typeof r.loggedIn === 'boolean') { mode = 'backend'; me = r; }
-  } catch (e) { mode = 'static'; }
-
-  // 3) بالوضع الثابت: نتعرف على الحساب والسيرفرات مباشرة من ديسكورد
-  if (mode === 'static') me = await loadStaticSession();
-
-  renderNav();
-  window.addEventListener('hashchange', route);
-  route();
-})();
+function guideClose(){clearTimeout(gT);guide.classList.remove('on');document.body.style.overflow='';document.getElementById('guideBtn').focus();}
+document.getElementById('guideBtn').onclick=guideOpen;
+document.getElementById('gClose').onclick=guideClose;
+guide.addEventListener('click',e=>{if(e.target===guide)guideClose();});
+document.getElementById('whatBtn').onclick=play;
+document.getElementById('closeBtn').onclick=stop;
+addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(intro.classList.contains('on'))stop();else if(guide.classList.contains('on'))guideClose();});
 </script>
 </body>
 </html>
