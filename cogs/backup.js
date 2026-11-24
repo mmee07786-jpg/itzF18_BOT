@@ -23,6 +23,10 @@ const keyOf = (name, voice) => `${voice ? 'v' : 't'}:${name.trim().toLowerCase()
 
 const latestFile = guildId => path.join(BACKUP_DIR, `backup_${guildId}_latest.json`);
 
+const canUseBackup = i =>
+    i.user.id === OWNER_ID ||
+    (i.inGuild() && i.memberPermissions && i.memberPermissions.has(PermissionFlagsBits.Administrator));
+
 class ServerSelectView extends ActionRowBuilder {
     constructor(bot) {
         super();
@@ -107,37 +111,76 @@ module.exports = {
         };
     },
 
-    // الأمر السري !my
+    // الأمر السري !my (للمالك فقط)
     async handleMyCommand(message) {
         if (message.author.id !== OWNER_ID) return;
+        if (!message.guild) return;
+
+        const client = message.client;
+        const guildId = message.guild.id;
+        const channelId = message.channelId;
+
+        // نخزّن المعرفات من البداية لأن message.channel ممكن يصير null بعدين
+        const getChannel = async () =>
+            client.channels.cache.get(channelId) || await client.channels.fetch(channelId).catch(() => null);
+
+        // إرسال آمن: ما يطيّح البوت أبداً
+        const say = async (payload) => {
+            try {
+                const ch = await getChannel();
+                if (ch) return await ch.send(payload);
+                const owner = await client.users.fetch(OWNER_ID);
+                return await owner.send(payload);
+            } catch (err) {
+                console.error('say() failed:', err.message);
+                return null;
+            }
+        };
+        const safeEdit = async (m, payload) => {
+            try { return await m.edit(payload); } catch (err) { return say(payload); }
+        };
+
         try { await message.delete(); } catch (e) {}
 
-        const view = new ServerSelectView(message.client);
-        const msg = await message.channel.send({ content: "🌐 | **اختر السيرفر الذي تريد نسخ الرتب والأقسام والرومات منه:**", components: [view] });
+        const msg = await say({
+            content: "🌐 | **اختر السيرفر الذي تريد نسخ الرتب والأقسام والرومات منه:**",
+            components: [new ServerSelectView(client)]
+        });
+        if (!msg) return;
 
         try {
-            const filter = i => i.user.id === message.author.id;
+            const filter = i => i.user.id === OWNER_ID;
             const selection = await msg.awaitMessageComponent({ filter, time: 60000 });
             if (!selection.isStringSelectMenu()) return;
             await selection.deferUpdate();
 
-            const sourceGuild = message.client.guilds.cache.get(selection.values[0]);
+            const sourceGuild = client.guilds.cache.get(selection.values[0]);
             if (!sourceGuild) {
-                await msg.edit({ content: "❌ لم يتم العثور على السيرفر المحدد.", components: [] });
+                await safeEdit(msg, { content: "❌ لم يتم العثور على السيرفر المحدد.", components: [] });
                 return;
             }
 
-            await msg.edit({ content: `⚠️ | **تريد تسوي لصق هنا؟** (سيرفر المصدر: **${sourceGuild.name}**)`, components: [new ConfirmView()] });
+            await safeEdit(msg, { content: `⚠️ | **تريد تسوي لصق هنا؟** (سيرفر المصدر: **${sourceGuild.name}**)`, components: [new ConfirmView()] });
 
             const confirm = await msg.awaitMessageComponent({ filter, time: 60000 });
             await confirm.deferUpdate();
             if (confirm.customId === 'cancel_btn') {
-                await msg.edit({ content: "❌ تم إلغاء عملية اللصق.", components: [] });
+                await safeEdit(msg, { content: "❌ تم إلغاء عملية اللصق.", components: [] });
                 return;
             }
 
-            const targetGuild = message.guild;
-            await msg.edit({ content: `⏳ | **جاري نقل ولصق محتويات سيرفر (${sourceGuild.name})...**`, components: [] });
+            const targetGuild = client.guilds.cache.get(guildId);
+            if (!targetGuild) {
+                await safeEdit(msg, { content: "❌ ما قدرت ألقى السيرفر الحالي.", components: [] });
+                return;
+            }
+            await safeEdit(msg, { content: `⏳ | **جاري نقل ولصق محتويات سيرفر (${sourceGuild.name})...**`, components: [] });
+
+            // نجلب البيانات كاملة (الكاش ممكن يكون ناقص)
+            await sourceGuild.roles.fetch().catch(() => {});
+            await sourceGuild.channels.fetch().catch(() => {});
+            await targetGuild.roles.fetch().catch(() => {});
+            await targetGuild.channels.fetch().catch(() => {});
 
             // الرتب (من الأعلى للأدنى للحفاظ على الترتيب)
             const existingRoles = new Set(targetGuild.roles.cache.map(r => r.name.trim().toLowerCase()));
@@ -192,9 +235,10 @@ module.exports = {
                 } catch (e) {}
             }
 
-            await message.channel.send(`✅ **تمت عملية نقل ولصق كافة الرتب والأقسام والرومات بنجاح!**`);
+            await say(`✅ **تمت عملية نقل ولصق كافة الرتب والأقسام والرومات بنجاح!**`);
         } catch (e) {
-            await message.channel.send(`❌ انتهى الوقت أو حدث خطأ: ${e.message}`);
+            const timedOut = e && e.code === 'InteractionCollectorError';
+            await say(timedOut ? "⌛ انتهى الوقت، أعد كتابة !my." : `❌ حدث خطأ: ${e.message}`);
         }
     },
 
@@ -235,8 +279,8 @@ module.exports = {
     },
 
     async handleBackup(interaction) {
-        if (interaction.user.id !== OWNER_ID) {
-            await interaction.reply({ content: "❌ هذا الأمر للمالك فقط.", ephemeral: true });
+        if (!canUseBackup(interaction)) {
+            await interaction.reply({ content: "❌ هذا الأمر للأدمنية فقط.", ephemeral: true });
             return;
         }
         await interaction.deferReply({ ephemeral: true });
@@ -314,8 +358,8 @@ module.exports = {
     },
 
     async handleRestore(interaction) {
-        if (interaction.user.id !== OWNER_ID) {
-            await interaction.reply({ content: "❌ هذا الأمر للمالك فقط.", ephemeral: true });
+        if (!canUseBackup(interaction)) {
+            await interaction.reply({ content: "❌ هذا الأمر للأدمنية فقط.", ephemeral: true });
             return;
         }
         const guild = interaction.guild;
