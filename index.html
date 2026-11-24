@@ -2,74 +2,85 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>itzF18 BOT — شرح البوت والأوامر</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Lalezar&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-:root{--void:#07070a;--ink:#101015;--line:#24242c;--bone:#f1efe9;--mute:#9b9ba8;--red:#e11d2e;--ice:#22d3ee;--blue:#3b9bff}
+:root{--void:#07070a;--ink:#101015;--line:#24242c;--bone:#f1efe9;--mute:#9b9ba8;--red:#e11d2e;--ice:#22d3ee;--blue:#3b9bff;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box}
 *{box-sizing:border-box;margin:0;padding:0}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;scroll-padding-top:70px}
 body{background:var(--void);color:var(--bone);font-family:Tajawal,Tahoma,sans-serif;line-height:1.8;min-height:100vh;overflow-x:hidden}
 a{color:inherit;text-decoration:none}
 button{font:inherit;cursor:pointer;color:inherit}
 :focus-visible{outline:2px solid var(--ice);outline-offset:3px}
 .disp{font-family:Lalezar,Tajawal,sans-serif;font-weight:400}
-
-/* الشريط العلوي: رابط الدعوة */
 nav{position:sticky;top:0;z-index:30;background:rgba(7,7,10,.86);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
 .nav-in{max-width:1040px;margin:auto;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.logo{font-size:24px;letter-spacing:.5px;direction:ltr}
-.logo i{color:var(--red);font-style:normal}
-.invite{background:var(--red);color:#fff;padding:9px 20px;font-weight:700;font-size:14px;border-radius:4px;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);transition:background .2s}
+.logo{font-size:24px;direction:ltr}.logo i{color:var(--red);font-style:normal}
+.invite{background:var(--red);color:#fff;padding:9px 20px;font-weight:700;font-size:14px;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);transition:background .2s}
 .invite:hover{background:#ff3347}
-
-/* الواجهة */
-.hero{position:relative;text-align:center;padding:110px 18px 90px;overflow:hidden}
+.hero{position:relative;text-align:center;padding:90px 18px 60px;overflow:hidden}
 .hero:before{content:"";position:absolute;left:50%;top:48%;width:780px;height:780px;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(225,29,46,.32),transparent 62%);pointer-events:none}
-.hero h1{position:relative;font-size:clamp(54px,13vw,128px);line-height:1;direction:ltr;letter-spacing:1px}
+.hero h1{position:relative;font-size:clamp(54px,13vw,128px);line-height:1;direction:ltr}
 .hero h1 span{color:var(--red)}
-.hero p.sub{position:relative;max-width:520px;margin:16px auto 30px;color:var(--mute);font-size:17px}
-.what{position:relative;display:inline-flex;align-items:center;gap:10px;background:var(--bone);color:var(--void);border:0;padding:16px 34px;font-size:19px;font-weight:700;clip-path:polygon(14px 0,100% 0,calc(100% - 14px) 100%,0 100%);transition:background .2s,transform .2s}
-.what:hover{background:var(--ice);transform:translateY(-2px)}
-.dev-line{position:relative;margin-top:26px;color:var(--mute);font-size:15px}
-
+.sub{position:relative;max-width:520px;margin:16px auto 30px;color:var(--mute);font-size:17px}
 .btns{position:relative;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.what{display:inline-flex;background:var(--bone);color:var(--void);border:0;padding:15px 32px;font-size:18px;font-weight:700;clip-path:polygon(14px 0,100% 0,calc(100% - 14px) 100%,0 100%);transition:background .2s,transform .2s}
+.what:hover{background:var(--ice);transform:translateY(-2px)}
 .what.alt{background:transparent;color:var(--bone);box-shadow:inset 0 0 0 2px var(--bone)}
-.what.alt:hover{background:var(--red);box-shadow:inset 0 0 0 2px var(--red);color:#fff}
-.rise{opacity:0;transform:translateY(28px);animation:rise .9s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:var(--d,0s)}
-@keyframes rise{to{opacity:1;transform:none}}
-.rv{opacity:0;transform:translateY(26px) scale(.97);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.2,1);transition-delay:var(--d,0s)}
-.rv.in{opacity:1;transform:none}
-.ov{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.78);backdrop-filter:blur(6px)}
-.ov.on{display:flex}
-.ov.on .sheet{animation:pop .5s cubic-bezier(.2,.8,.2,1)}
-@keyframes pop{from{opacity:0;transform:translateY(30px) scale(.94)}}
-.demo{margin:6px 0 16px}
-.bar{background:#000;border:1px solid rgba(34,211,238,.4);padding:11px 14px;font-family:Consolas,monospace;font-size:16px;color:#e8fbff;min-height:46px;text-align:left;direction:ltr}
-.caret{display:inline-block;width:2px;height:1.1em;background:var(--ice);vertical-align:-3px;margin-left:2px;animation:blink 1s steps(1) infinite}
-@keyframes blink{50%{opacity:0}}
-.sug{direction:ltr;text-align:left;background:#0b1a20;border:1px solid var(--line);border-top:0}
-.sug div{padding:7px 14px;font-size:14px;color:#d8e8ec;border-bottom:1px solid rgba(34,211,238,.12)}
-.sug b{font-family:Consolas,monospace;color:var(--ice);margin-right:10px}
-.steps{margin:0 0 12px;padding-inline-start:22px;color:#d8e8ec}
-.steps li{border:0;padding:4px 0}
-.steps li:before{content:none}
-.tip{font-size:14px;color:#9fc7d0;margin-bottom:16px}
-@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.rise,.rv{opacity:1;transform:none;animation:none;transition:none}.body{animation:none}.caret{animation:none}.ov.on .sheet{animation:none}}
-
-/* الأوامر */
+.what.alt:hover{background:var(--red);color:#fff}
+.dev-line{position:relative;margin-top:24px;color:var(--mute);font-size:15px}
+.dev{color:var(--blue);font-weight:700;border-bottom:2px solid var(--blue)}
+.dcs{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.dc{background:transparent;border:1px solid var(--blue);color:var(--blue);padding:5px 16px;font-size:14px;transition:.15s}
+.dc:hover{background:var(--blue);color:#04101c}
+.dc b{font-family:Consolas,monospace;direction:ltr;display:inline-block}
 main{max-width:1040px;margin:auto;padding:0 18px 70px}
 h2.t{font-size:38px;margin:10px 0 6px}
 .lead{color:var(--mute);max-width:640px;margin-bottom:22px}
-.how{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:0;border:1px solid var(--line);margin-bottom:34px}
-.how div{padding:18px 20px;border-inline-start:1px solid var(--line)}
+.how{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));border:1px solid var(--line);margin-bottom:30px}
+.how div{padding:16px 20px;border-inline-start:1px solid var(--line)}
 .how div:first-child{border-inline-start:0}
-.how b{display:block;font-size:17px;margin-bottom:2px}
-.how span{color:var(--mute);font-size:14px}
-.tools{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
-.q{flex:1;min-width:200px;background:var(--ink);border:1px solid var(--line);color:var(--bone);padding:11px 14px;font:inherit;font-size:15px;border-radius:0}
+.how b{display:block;font-size:17px}.how span{color:var(--mute);font-size:14px}
+
+/* ===== مجلدات زجاجية ===== */
+.desk{position:relative;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:26px 20px;justify-items:center;padding:24px 0 14px;margin-bottom:18px}
+.desk:before{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(255,255,255,.14) 1.1px,transparent 1.4px);background-size:22px 22px;pointer-events:none}
+.gf{--hinge:0deg;--lift:42px;--spread:0px;--fan:0deg;--stack:15px;--ease:cubic-bezier(.2,.8,.2,1);--spring:cubic-bezier(.34,1.36,.5,1);position:relative;direction:ltr;flex:none}
+.gf:hover,.gf:focus-within{--hinge:-11deg;--lift:-34px;--spread:8px;--fan:1.4deg;--stack:10px}
+.gf[data-open]{--hinge:-24deg;--lift:-96px;--spread:40px;--fan:5deg;--stack:30px}
+.gf-stage{position:absolute;left:0;top:0;width:340px;height:272px;transform-origin:0 0}
+.gf-shadow{position:absolute;left:18px;right:18px;bottom:-6px;height:60px;border-radius:40px;background:rgba(0,0,0,.7);filter:blur(22px)}
+.gf-back{position:absolute;inset:0;background:radial-gradient(60% 80% at 15% 25%,var(--c1),transparent 70%),radial-gradient(70% 70% at 85% 65%,var(--c2),transparent 72%),linear-gradient(135deg,var(--c3),var(--c4))}
+.gf-back:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(255,255,255,.2),transparent 24%)}
+.gf-rim{position:absolute;left:0;top:0;overflow:visible;pointer-events:none;fill:none}
+.gf-rim path{stroke:rgba(255,255,255,.18)}
+.gf-files{position:absolute;inset:0;z-index:5;pointer-events:none;clip-path:inset(-400px -400px 10px -400px)}
+.gf-sheet{all:unset;box-sizing:border-box;position:absolute;left:34px;top:96px;width:272px;height:184px;border-radius:16px;overflow:hidden;cursor:pointer;pointer-events:auto;background:linear-gradient(180deg,#2c2c30,#1c1c1f);box-shadow:inset 0 1px 0 rgba(255,255,255,.14),0 0 0 .5px rgba(255,255,255,.1),0 12px 28px -8px rgba(0,0,0,.7);transform-origin:50% 100%;transform:translate(calc(var(--jx) + var(--slot)*var(--spread)),calc(var(--lift) + var(--depth)*var(--stack)*-1)) rotate(calc(var(--jr) + var(--slot)*var(--fan)));transition:transform .75s var(--spring) calc(var(--depth)*40ms)}
+.gf[data-open] .gf-sheet:hover,.gf[data-open] .gf-sheet:focus-visible{transform:translate(calc(var(--jx) + var(--slot)*var(--spread)),calc(var(--lift) + var(--depth)*var(--stack)*-1 - 18px)) rotate(0deg);transition-delay:0s;box-shadow:0 22px 40px -12px rgba(0,0,0,.8),0 0 0 1px var(--ice)}
+.gf-sheet:focus-visible{outline:2px solid var(--ice);outline-offset:2px}
+.sh-h{position:absolute;left:14px;right:14px;top:11px;display:flex;justify-content:space-between;gap:10px;align-items:baseline;white-space:nowrap}
+.sh-n{font:700 13px Consolas,monospace;color:#fafafa;overflow:hidden;text-overflow:ellipsis}
+.sh-m{font-size:11px;color:var(--ice)}
+.sh-m.a{color:#ff6b78}.sh-m.o{color:#ffcc4d}
+.sh-l{position:absolute;left:14px;right:14px;top:42px;display:flex;flex-direction:column;gap:9px}
+.sh-l i{display:block;height:5px;border-radius:3px;background:rgba(255,255,255,.09)}
+.sh-l i:first-child{height:9px;margin-bottom:4px;background:rgba(255,255,255,.17)}
+.gf-front{position:absolute;left:0;top:74px;width:340px;height:198px;z-index:10;-webkit-backdrop-filter:blur(22px) saturate(1.5);backdrop-filter:blur(22px) saturate(1.5);transform-origin:50% 100%;transform:perspective(760px) rotateX(var(--hinge));transition:transform .8s var(--spring)}
+.gf-tint{position:absolute;inset:0;background:linear-gradient(180deg,rgba(18,18,20,.18),rgba(14,14,16,.62) 46%,rgba(8,8,10,.94))}
+.gf-front .gf-rim{width:340px;height:198px}
+.gf-front .gf-rim path{stroke:rgba(255,255,255,.5);stroke-width:2.2}
+.gf[data-sel] .gf-front .gf-rim path{stroke:var(--ice);stroke-width:3}
+.gf-hit{all:unset;position:absolute;inset:0;z-index:1;cursor:pointer}
+.gf-hit:focus-visible~.gf-label b{text-decoration:underline;text-underline-offset:4px}
+.gf-label{position:absolute;z-index:2;left:28px;bottom:30px;display:flex;flex-direction:column;gap:2px;pointer-events:none;max-width:290px}
+.gf-label b{font:400 25px/1.2 Lalezar,Tajawal,sans-serif;color:#f5f5f7}
+.gf-label span{font-size:13px;color:rgba(245,245,247,.6)}
+
+.tools{margin-bottom:14px}
+.q{width:100%;background:var(--ink);border:1px solid var(--line);color:var(--bone);padding:11px 14px;font:inherit;font-size:15px;border-radius:0}
 .q:focus{outline:none;border-color:var(--ice)}
 .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .tab{background:transparent;border:1px solid var(--line);padding:6px 14px;font-size:14px;transition:.15s}
@@ -79,23 +90,19 @@ h2.t{font-size:38px;margin:10px 0 6px}
 .tab[aria-pressed=true] small{color:#ffd5d9}
 .count{color:var(--mute);font-size:14px;margin:6px 0 14px}
 .cmds{display:flex;flex-direction:column;gap:10px}
-.cmd{background:var(--ink);border:1px solid var(--line);border-inline-start:4px solid var(--ice);transition:border-color .2s,background .2s}
-.cmd.adm{border-inline-start-color:var(--red)}
-.cmd.own{border-inline-start-color:#ffcc4d}
+.cmd{background:var(--ink);border:1px solid var(--line);border-inline-start:4px solid var(--ice)}
+.cmd.adm{border-inline-start-color:var(--red)}.cmd.own{border-inline-start-color:#ffcc4d}
 .cmd[open]{background:#14141b;border-color:#34343f}
+.cmd.hl{box-shadow:0 0 0 2px var(--ice)}
 .cmd summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;padding:14px 16px;flex-wrap:wrap}
 .cmd summary::-webkit-details-marker{display:none}
-.cmd summary:hover{background:rgba(255,255,255,.03)}
-.cmd-n{font-family:Consolas,monospace;font-size:18px;font-weight:700;direction:ltr;min-width:150px;text-align:left}
+.cmd-n{font:700 18px Consolas,monospace;direction:ltr;min-width:150px;text-align:left}
 .who{font-size:12px;padding:1px 10px;border:1px solid;white-space:nowrap}
-.who.m{color:var(--ice);border-color:var(--ice)}
-.who.a{color:#ff6b78;border-color:#ff6b78}
-.who.o{color:#ffcc4d;border-color:#ffcc4d}
+.who.m{color:var(--ice)}.who.a{color:#ff6b78}.who.o{color:#ffcc4d}
 .sd{flex:1;min-width:200px;color:#cfcfd8;font-size:14.5px}
 .chev{width:10px;height:10px;border-inline-end:2px solid var(--mute);border-bottom:2px solid var(--mute);transform:rotate(45deg);transition:transform .25s;margin-inline-start:auto}
 .cmd[open] .chev{transform:rotate(-135deg)}
-.body{padding:2px 18px 18px;border-top:1px dashed var(--line);animation:drop .35s ease}
-@keyframes drop{from{opacity:0;transform:translateY(-8px)}}
+.body{padding:2px 18px 18px;border-top:1px dashed var(--line)}
 .body h4{font-size:15px;color:var(--ice);margin:16px 0 6px}
 .perm{margin-top:14px;font-size:14px;color:var(--mute)}
 .perm b{color:var(--bone);font-weight:500;border-bottom:1px solid var(--red)}
@@ -104,138 +111,102 @@ h2.t{font-size:38px;margin:10px 0 6px}
 .ot td:first-child{font-family:Consolas,monospace;direction:ltr;text-align:left;color:#c9e9ff;white-space:nowrap;width:1%}
 .ot td:nth-child(2){white-space:nowrap;width:1%;font-size:12.5px}
 .rq{color:#ff6b78}.op{color:var(--mute)}
-.body ol{padding-inline-start:22px;color:#d8d8e0;font-size:14.5px}
-.body ol li{padding:2px 0}
-.body ol code,.nt code{font-family:Consolas,monospace;direction:ltr;display:inline-block;background:#000;padding:0 7px;color:#c9e9ff;font-size:13px}
-.exw{display:flex;gap:8px;margin-top:14px;align-items:stretch}
-.exw code{flex:1;display:block;background:#000;border:1px solid var(--line);padding:9px 12px;direction:ltr;text-align:left;color:#c9e9ff;font-family:Consolas,monospace;font-size:13.5px;overflow-x:auto;white-space:nowrap}
-.cp{background:transparent;border:1px solid var(--ice);color:var(--ice);padding:0 16px;font-size:13px;transition:.15s}
+.body ol,.steps{padding-inline-start:22px;color:#d8d8e0;font-size:14.5px}
+code{font-family:Consolas,monospace;direction:ltr;display:inline-block;background:#000;padding:0 7px;color:#c9e9ff;font-size:13px}
+.exw{display:flex;gap:8px;margin-top:14px}
+.exw code{flex:1;border:1px solid var(--line);padding:9px 12px;text-align:left;font-size:13.5px;overflow-x:auto;white-space:nowrap}
+.cp{background:transparent;border:1px solid var(--ice);color:var(--ice);padding:0 16px;font-size:13px}
 .cp:hover{background:var(--ice);color:#021015}
 .nt{margin-top:12px;font-size:14px;color:#ffd08a;border-inline-start:3px solid #ffd08a;padding:2px 12px}
 .empty{padding:34px 10px;text-align:center;color:var(--mute)}
-.dcs{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
-.dc{background:transparent;border:1px solid var(--blue);color:var(--blue);padding:5px 16px;font-size:14px;transition:.15s}
-.dc:hover{background:var(--blue);color:#04101c}
-.dc b{font-family:Consolas,monospace;font-weight:700;direction:ltr;display:inline-block}
 #toast{position:fixed;bottom:24px;left:50%;transform:translate(-50%,30px);background:var(--bone);color:var(--void);padding:10px 22px;font-weight:700;opacity:0;pointer-events:none;transition:.3s;z-index:200}
 #toast.on{opacity:1;transform:translate(-50%,0)}
 footer{border-top:1px solid var(--line);text-align:center;padding:30px 18px 40px;color:var(--mute);font-size:15px}
-.dev{color:var(--blue);font-weight:700;border-bottom:2px solid var(--blue);transition:color .2s}
-.dev:hover{color:#8cc6ff}
-
-/* العرض السينمائي */
-#intro{position:fixed;inset:0;z-index:100;display:none;background:#efede6}
-#intro.on{display:block}
-#fx{position:absolute;inset:0;width:100%;height:100%}
-#panel{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:18px;opacity:0;pointer-events:none;transition:opacity .7s}
-#panel.show{opacity:1;pointer-events:auto}
-.sheet{width:min(620px,100%);max-height:92vh;overflow:auto;background:rgba(5,16,20,.88);backdrop-filter:blur(8px);border:1px solid var(--ice);padding:28px 26px;box-shadow:0 0 70px rgba(34,211,238,.25)}
-.sheet h3{font-size:38px;color:var(--ice);direction:ltr;text-align:right;line-height:1.2;margin-bottom:10px}
-.sheet p{color:#d8e8ec;margin-bottom:10px;font-size:16px}
+.ov{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(0,0,0,.78);backdrop-filter:blur(6px)}
+.ov.on{display:flex}
+.sheet{width:min(620px,100%);max-height:92vh;overflow:auto;background:rgba(5,16,20,.92);border:1px solid var(--ice);padding:26px;box-shadow:0 0 70px rgba(34,211,238,.25)}
+.sheet h3{font-size:34px;color:var(--ice);line-height:1.2;margin-bottom:10px}
+.sheet p{color:#d8e8ec;margin-bottom:10px}
 .sheet ul{list-style:none;margin:8px 0 14px}
 .sheet li{padding:5px 0;border-bottom:1px solid rgba(34,211,238,.18);font-size:15px}
 .sheet li:before{content:"◆";color:var(--red);margin-inline-end:10px;font-size:11px}
-.sheet .by{margin:14px 0 18px;font-size:16px}
-.close{background:var(--ice);color:#021015;border:0;padding:10px 26px;font-weight:700}
-
+.close{background:var(--ice);color:#021015;border:0;padding:10px 26px;font-weight:700;margin-top:10px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.gf *{transition:none!important}}
 </style>
 </head>
 <body>
-
-<nav>
-  <div class="nav-in">
-    <a class="logo disp" href="#top">itzF18 <i>BOT</i></a>
-    <a class="invite" id="inv" href="#" target="_blank" rel="noopener">أضف البوت لسيرفرك</a>
-  </div>
-</nav>
+<nav><div class="nav-in"><a class="logo disp" href="#top">itzF18 <i>BOT</i></a><a class="invite" id="inv" href="#" target="_blank" rel="noopener">أضف البوت لسيرفرك</a></div></nav>
 
 <header class="hero" id="top">
-  <h1 class="disp rise" style="--d:.1s">itzF18 <span>BOT</span></h1>
-  <p class="sub rise" style="--d:.35s">شرح كامل لأوامر البوت، وكيف يستخدمها العضو وكيف يستخدمها الإداري.</p>
-  <div class="btns rise" style="--d:.6s">
-    <button class="what" id="whatBtn" type="button">ما هو itzF18 BOT؟</button>
-    <button class="what alt" id="guideBtn" type="button">كيف أستخدم الأوامر؟</button>
+  <h1 class="disp">itzF18 <span>BOT</span></h1>
+  <p class="sub">شرح كامل لأوامر البوت، وكيف يستخدمها العضو وكيف يستخدمها الإداري.</p>
+  <div class="btns">
+    <button class="what" data-ov="what" type="button">ما هو itzF18 BOT؟</button>
+    <button class="what alt" data-ov="guide" type="button">كيف أستخدم الأوامر؟</button>
   </div>
-  <div class="dev-line rise" style="--d:.85s">المطوّر: فهد — <a class="dev" href="https://www.tiktok.com/@demon_a771?" target="_blank" rel="noopener">itzF18</a></div>
-  <div class="dcs rise" style="--d:1s" data-dcs></div>
+  <div class="dev-line">المطوّر: فهد — <a class="dev" href="https://www.tiktok.com/@demon_a771?" target="_blank" rel="noopener">itzF18</a></div>
+  <div class="dcs" data-dcs></div>
 </header>
 
 <main>
   <h2 class="t disp">شرح الأوامر</h2>
-  <p class="lead">كل أمر هنا من أوامر البوت الفعلية. اضغط على أي أمر يفتح لك خياراته وخطوات استخدامه ومثال جاهز تنسخه.</p>
-
+  <p class="lead">كل قسم مجلد زجاجي: مرّر عليه ليميل، واضغط ليفتح وتطلع أوامره كملفات. اضغط على أي ملف يفتح لك الأمر بخطواته ومثال جاهز تنسخه.</p>
   <div class="how">
     <div><b>1. اكتب /</b><span>في خانة الرسالة، وتظهر لك قائمة أوامر البوت.</span></div>
     <div><b>2. اختر الأمر</b><span>اضغط على الأمر أو كمل كتابة اسمه.</span></div>
     <div><b>3. عبّي الخيارات</b><span>الخيارات المطلوبة تظهر تلقائياً، ثم اضغط Enter.</span></div>
   </div>
-
-  <div class="tools">
-    <input class="q" id="q" type="search" placeholder="ابحث عن أمر... مثل ban أو رايد أو متجر" aria-label="بحث في الأوامر">
-  </div>
+  <div class="desk" id="desk"></div>
+  <div class="tools"><input class="q" id="q" type="search" placeholder="ابحث عن أمر... مثل ban أو رايد أو متجر" aria-label="بحث في الأوامر"></div>
   <div class="tabs" id="tabs" role="group" aria-label="أقسام الأوامر"></div>
   <div class="tabs" id="whoTabs" role="group" aria-label="نوع المستخدم"></div>
   <div class="count" id="count"></div>
   <div class="cmds" id="list"></div>
 </main>
 
-<footer>
-  تم تطوير البوت بواسطة فهد — <a class="dev" href="https://www.tiktok.com/@demon_a771?" target="_blank" rel="noopener">itzF18</a>
-  <div class="dcs" data-dcs></div>
-</footer>
+<footer>تم تطوير البوت بواسطة فهد — <a class="dev" href="https://www.tiktok.com/@demon_a771?" target="_blank" rel="noopener">itzF18</a><div class="dcs" data-dcs></div></footer>
 
-<!-- العرض السينمائي + الشرح -->
-<div id="intro" role="dialog" aria-modal="true" aria-label="ما هو itzF18 BOT">
-  <canvas id="fx"></canvas>
-  <div id="panel">
-    <div class="sheet">
-      <h3 class="disp">What is itzF18 BOT?</h3>
-      <p>itzF18 BOT بوت ديسكورد عربي يساعدك تدير سيرفرك بدون تعقيد: ينظّم الرايدات، يراقب السيرفر، ويرد على أعضائك.</p>
-      <ul>
-        <li>الرايدات والتوبات: إعلان الرايد وتسجيل النتائج ولوحات التوب 10 و20.</li>
-        <li>الإشراف: طرد وباند وتايم أوت، وكلمات ممنوعة مع عقوبة تلقائية.</li>
-        <li>الترحيب والمغادرة وشكر البوست برسائل مخصصة.</li>
-        <li>اقتصاد عملة أورا: جائزة يومية ومتجر لكل سيرفر.</li>
-        <li>ترجمة فورية: ضع علم دولة على أي رسالة وتنترجم.</li>
-        <li>فحص تفاعل ونسخ احتياطي واستعادة لبنية السيرفر.</li>
-      </ul>
-      <p class="by">المطوّر: فهد — <a class="dev" href="https://www.tiktok.com/@demon_a771?" target="_blank" rel="noopener">itzF18</a></p>
-      <div class="dcs" data-dcs style="justify-content:flex-start;margin:0 0 16px"></div>
-      <button class="close" id="closeBtn" type="button">إغلاق</button>
-    </div>
+<div class="ov" id="what" role="dialog" aria-modal="true" aria-label="ما هو itzF18 BOT">
+  <div class="sheet">
+    <h3 class="disp" dir="ltr" style="text-align:right">What is itzF18 BOT?</h3>
+    <p>itzF18 BOT بوت ديسكورد عربي يساعدك تدير سيرفرك بدون تعقيد: ينظّم الرايدات، يراقب السيرفر، ويرد على أعضائك.</p>
+    <ul>
+      <li>الرايدات والتوبات: إعلان الرايد وتسجيل النتائج ولوحات التوب 10 و20.</li>
+      <li>الإشراف: طرد وباند وتايم أوت، وتحذيرات تلقائية.</li>
+      <li>الترحيب والمغادرة وشكر البوست برسائل مخصصة.</li>
+      <li>اقتصاد عملة أورا: جائزة يومية ومتجر لكل سيرفر.</li>
+      <li>ترجمة فورية: ضع علم دولة على أي رسالة وتنترجم.</li>
+      <li>فحص تفاعل ونسخ احتياطي واستعادة لبنية السيرفر.</li>
+    </ul>
+    <button class="close" data-x type="button">إغلاق</button>
   </div>
 </div>
-
-<div id="toast" role="status"></div>
 <div class="ov" id="guide" role="dialog" aria-modal="true" aria-label="كيف أستخدم الأوامر">
   <div class="sheet">
-    <h3 class="disp" style="font-size:34px;direction:rtl">كيف أستخدم الأوامر؟</h3>
-    <div class="demo"><div class="bar"><span id="typed"></span><i class="caret"></i></div><div class="sug" id="sug"></div></div>
+    <h3 class="disp">كيف أستخدم الأوامر؟</h3>
     <ol class="steps">
       <li>اكتب <b dir="ltr">/</b> في خانة الرسالة داخل أي روم يقدر البوت يشوفه.</li>
       <li>تظهر قائمة أوامر البوت: اضغط على الأمر اللي تبيه أو كمل كتابة اسمه.</li>
       <li>عبّي الخيارات: المطلوبة أولاً، وتنقل بينها بزر Tab.</li>
       <li>اضغط Enter وانتظر رد البوت.</li>
     </ol>
-    <p class="tip">أوامر "للإداري" تظهر فقط لمن عنده صلاحية. وإذا ما ظهرت أوامر البوت، تأكد إنه داخل السيرفر وعنده صلاحية استخدام الأوامر.</p>
-    <button class="close" id="gClose" type="button">فهمت</button>
+    <p style="margin-top:12px;color:#9fc7d0;font-size:14px">أوامر "للإداري" تظهر فقط لمن عنده صلاحية. وإذا ما ظهرت أوامر البوت، تأكد إنه داخل السيرفر وعنده صلاحية استخدام الأوامر.</p>
+    <button class="close" data-x type="button">فهمت</button>
   </div>
 </div>
+<div id="toast" role="status"></div>
 
 <script>
-/* ═════════ إعدادات سهلة التعديل ═════════ */
-const CLIENT_ID = "1546817538149711922";
-const INVITE = "https://discord.com/oauth2/authorize?client_id=" + CLIENT_ID + "&permissions=8&integration_type=0&scope=bot";
-document.getElementById('inv').href = INVITE;
+const CLIENT_ID="1546817538149711922";
+document.getElementById('inv').href="https://discord.com/oauth2/authorize?client_id="+CLIENT_ID+"&permissions=8&integration_type=0&scope=bot";
 
-/* ═════════ الأوامر (مأخوذة من ملفات البوت) ═════════
-   who: m = للجميع ، a = للإداري ، o = لمنشئ البوت فقط */
 const CATS={mod:'الإشراف',raids:'الرايدات',tops:'التوبات وملفات الأعضاء',greet:'الترحيب والمغادرة والبوست',eco:'اقتصاد أورا والمتجر',act:'الفعاليات والترجمة',sys:'النسخ والنظام'};
+/* ألوان خلفية كل مجلد: 4 ألوان */
+const ART={mod:['#a3201a','#3d5f68','#07090c','#16252c'],raids:['#b3502f','#8f6c9c','#120c18','#3e2850'],tops:['#c2433f','#6f97c2','#2a1e2a','#22395e'],greet:['#9fb4c7','#e9c2b8','#d9e2ea','#8aa0b4'],eco:['#a7843a','#4f7a5a','#070b08','#173024'],act:['#ef4a2b','#3e2850','#2b1a24','#120c18'],sys:['#3d5f68','#22395e','#0b0f14','#16252c']};
 const MEM=['member',1,'العضو: اكتب @ ثم اسمه'],RSN=['reason',0,'السبب'];
 const COMMANDS=[];
 const C=(c,n,who,perm,d,opts,ex,note,steps)=>COMMANDS.push({c,n,who,perm,d,opts:opts||[],ex,note,steps});
 
-/* الإشراف */
 C('mod','/warn','a','Kick Members','يحذّر العضو، وإذا وصل 5 تحذيرات ينطرد تلقائياً ويرجع عداده صفر.',[MEM,RSN],'/warn member:@أحمد reason:سب في الشات','التحذيرات تنحفظ بذاكرة البوت، فتتصفر إذا انعاد تشغيله.');
 C('mod','/clear_warnings','a','Kick Members','يصفّر تحذيرات العضو.',[MEM],'/clear_warnings member:@أحمد');
 C('mod','/kick','a','Kick Members','يطرد العضو من السيرفر، ويقدر يرجع بدعوة جديدة.',[MEM,RSN],'/kick member:@أحمد reason:مخالفة القوانين');
@@ -247,7 +218,6 @@ C('mod','/mute','a','Mute Members','يكتم العضو صوتياً (Server Mut
 C('mod','/unmute','a','Mute Members','يلغي الكتم الصوتي عن العضو.',[MEM,RSN],'/unmute member:@أحمد');
 C('mod','/clear','a','Manage Messages','يحذف عدد من رسائل الروم الحالي (من 1 إلى 1000).',[['amount',1,'عدد الرسائل بين 1 و1000']],'/clear amount:50','يحذف الرسائل حتى عمر 30 يوم. اللي أقدم من 14 يوم تنحذف واحدة واحدة فتاخذ وقت أطول. يشتغل بالرومات النصية فقط.');
 
-/* الرايدات */
 C('raids','/raid-start','a','Administrator','ينشر إعلان رايد جاهز مع @here وزر دخول وزر لوحة المتصدرين.',[],'/raid-start','الإعلان يستخدم اسم الكلان ولونه وصورته من الأوامر name_clan و color_emed و set-img-raid-start. إذا كتبت الرابط بدون https يكمله البوت.',
  ['اكتب <code>/raid-start</code> وستفتح لك نافذة.','عبّي: Server Link (رابط السيرفر)، Difficulty (الصعوبة)، Targets / Matchup (الأهداف)، Our Count & Their Count (الأعداد)، Region (المنطقة).','اضغط إرسال، وينزل الإعلان بالروم.','زر Join يدخل الرايد، وزر Leaderboard يعرض أكثر المشاركين نشاطاً (يظهر لمن يضغط فقط).']);
 C('raids','/set-img-raid-start','a','Administrator','يحفظ صورة أو GIF تطلع تحت كل إعلان رايد بشكل دائم.',[['image',1,'الصورة أو الـ GIF (ارفعها كمرفق)']],'/set-img-raid-start image:banner.gif','الحد الأقصى 8MB، والصيغ المدعومة PNG و JPG و GIF و WEBP. يرسل لك معاينة بعد الحفظ.');
@@ -261,7 +231,6 @@ C('raids','/raid-add','a','Administrator','يزيد عدد رايدات عضو،
 C('raids','/raid-set','a','Administrator','يحدد عدد رايدات العضو مباشرة برقم تختاره.',[MEM,['amount',1,'العدد الجديد']],'/raid-set member:@أحمد amount:25');
 C('raids','/raid-reset','a','Administrator','يصفّر رايدات عضو واحد، أو الجميع.',[['member',0,'العضو (اتركه فاضي لتصفير الجميع)']],'/raid-reset member:@أحمد','إذا ما اخترت عضو يصفّر نقاط كل الأعضاء، فانتبه.');
 
-/* التوبات */
 C('tops','/set-top10-channel','a','Administrator','يحدد الروم اللي تنعرض فيه لوحة توب 10، وتتحدث تلقائياً بعد كل رايد.',[['channel',1,'روم اللوحة']],'/set-top10-channel channel:#توب-10');
 C('tops','/set-top20-channel','a','Administrator','يحدد روم لوحة المراكز من 11 إلى 20.',[['channel',1,'روم اللوحة']],'/set-top20-channel channel:#توب-20');
 C('tops','/avatar-roblox-top','a','Administrator','يحط صورة مخصصة لمركز معين بلوحة التوب.',[],'/avatar-roblox-top','تنحط الصورة وتتطبق على اللوحة مباشرة.',
@@ -271,7 +240,6 @@ C('tops','/set-roblox','m','بدون صلاحية','يربط يوزر روبلو
 C('tops','/set-roblox-user','a','Administrator','يربط يوزر روبلوكس لعضو ثاني.',[MEM,['username',1,'يوزر روبلوكس']],'/set-roblox-user member:@أحمد username:Ahmed123');
 C('tops','/set-country','a','Administrator','يحدد دولة العضو لتظهر بلوحة التوب.',[MEM,['country_value',1,'اسم الدولة']],'/set-country member:@أحمد country_value:السعودية');
 
-/* الترحيب والمغادرة والبوست */
 [['welcome','الترحيب','تنرسل لما ينضم عضو جديد','للمنشن','رابط الصورة'],['leave','المغادرة','تنرسل لما يغادر عضو','لاسم العضو','رابط الصورة أو GIF'],['boost','البوست','تنرسل لما أحد يسوي Boost للسيرفر','للمنشن','رابط الصورة']].forEach(([k,ar,when,ph,img])=>{
   C('greet',`/${k}_setup`,'a','Administrator',`يحدد الروم اللي تنرسل فيه رسائل ${ar}.`,[['channel',1,'الروم النصي']],`/${k}_setup channel:#${k==='welcome'?'الترحيب':k==='leave'?'المغادرة':'البوست'}`);
   C('greet',`/${k}_message`,'a','Administrator',`يعدّل نص رسالة ${ar} (${when}).`,[['message',1,'النص الجديد، واكتب {member} '+ph]],`/${k}_message message:هلا {member} نورت السيرفر`,'اكتب {member} بالضبط وهو يتبدل باسم العضو.');
@@ -279,7 +247,6 @@ C('tops','/set-country','a','Administrator','يحدد دولة العضو لتظ
   C('greet',`/test_${k}`,'a','Administrator',`يجرّب رسالة ${ar} عليك أنت قبل ما تنزل للأعضاء.`,[],`/test_${k}`);
 });
 
-/* الاقتصاد */
 C('eco','/daily','m','بدون صلاحية','تستلم 500 أورا جائزة يومية، وتنعاد كل 24 ساعة.',[],'/daily','إذا استلمت قبل كذا يقول لك كم باقي من الوقت.');
 C('eco','/balance','m','بدون صلاحية','يعرض رصيدك من عملة أورا، أو رصيد عضو ثاني.',[['member',0,'العضو (اتركه فاضي لرصيدك)']],'/balance','الرصيد واحد بكل السيرفرات اللي فيها البوت.');
 C('eco','/store','m','بدون صلاحية','يعرض سلع متجر هذا السيرفر بأسعارها ووصفها.',[],'/store','كل سيرفر له متجره الخاص.');
@@ -289,148 +256,108 @@ C('eco','/store_remove','a','Administrator','يحذف سلعة من متجر ه�
 C('eco','/give','o','منشئ البوت فقط','يضيف أورا لرصيد عضو.',[MEM,['amount',1,'الكمية (أكبر من صفر)']],'/give member:@أحمد amount:1000');
 C('eco','/take_money','o','منشئ البوت فقط','يسحب أورا من عضو، وإذا طلبت أكثر من رصيده يسحب كل اللي عنده.',[MEM,['amount',1,'الكمية']],'/take_money member:@أحمد amount:500');
 
-/* الفعاليات والترجمة */
 C('act','/set_activity_role','a','Administrator','يحفظ الرتبة اللي تنعطى لمن يفوز بفعالية فحص التفاعل.',[['role',1,'الرتبة']],'/set_activity_role role:@نشط','شغّل هذا الأمر مرة وحدة قبل /activity_check.');
 C('act','/activity_check','a','Administrator','يبدأ فحص تفاعل سريع: أول من يتفاعل خلال 5 ثواني ياخذ الرتبة المحفوظة.',[],'/activity_check','لازم للبوت صلاحية Manage Roles، ورتبته تكون أعلى من رتبة الفعالية. إذا ما تحددت رتبة يطلب منك /set_activity_role.',
  ['حدد الرتبة مرة وحدة بـ <code>/set_activity_role</code>.','اكتب <code>/activity_check</code>، وينزل Embed مع @everyone.','يضغط الأعضاء على التفاعل تحت الرسالة خلال 5 ثواني.','يعطيهم البوت الرتبة، ويعرض قائمة المتفاعلين.']);
 C('act','تفاعل علم 🇺🇸','m','بدون أمر','ترجمة فورية: حط علم دولة على أي رسالة وينترجم نصها للغة تلك الدولة.',[],'تفاعل 🇺🇸 على الرسالة','الأعلام العربية (🇸🇦 🇮🇶 🇪🇬 🇦🇪 وغيرها) للعربي، 🇺🇸 🇬🇧 للإنجليزي، 🇫🇷 فرنسي، 🇪🇸 إسباني، 🇩🇪 ألماني، 🇹🇷 تركي، 🇮🇷 فارسي، 🇷🇺 روسي، 🇮🇹 إيطالي، 🇨🇳 صيني، 🇯🇵 ياباني، 🇰🇷 كوري، 🇧🇷 🇵🇹 برتغالي، 🇮🇳 هندي، 🇵🇰 أوردو.',
  ['افتح الرسالة اللي تبي تترجمها.','اضغط على تفاعل (Reaction) واختر علم الدولة.','ينزل البوت ترجمة داخل Embed بعنوان "الترجمة الفورية".']);
 
-/* النسخ والنظام */
 C('sys','/backup','o','منشئ البوت فقط','ياخذ نسخة احتياطية من السيرفر: الرتب والأقسام والرومات وصلاحياتها.',[],'/backup','بعد ما ينتهي يعرض لك عدد الرتب والأقسام والرومات اللي انحفظت.');
 C('sys','/restore','o','منشئ البوت فقط','يستعيد بنية السيرفر من آخر نسخة محفوظة له.',[],'/restore','إذا ما فيه نسخة محفوظة لهذا السيرفر يبلغك. ينتهي بتقرير بنتيجة الاستعادة.');
 C('sys','/sync','o','منشئ البوت فقط','يزامن أوامر البوت يدوياً إذا ما ظهرت أو تغيرت.',[],'/sync');
 
-/* ═════════ عرض الأوامر ═════════ */
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.08});
 const WHO={m:'للجميع',a:'للإداري',o:'لمنشئ البوت'};
+const $=id=>document.getElementById(id);
 let cur='all',curWho='all',qv='';
+
+/* ===== المجلدات الزجاجية ===== */
+const GW=300,K=GW/340,HEAD=54;
+const BACK="M0 56A22 22 0 0 1 22 34L146 34C170 34 172 0 198 0L318 0A22 22 0 0 1 340 22L340 250A22 22 0 0 1 318 272L22 272A22 22 0 0 1 0 250Z";
+const FH=198,FRONT="M0 22A22 22 0 0 1 22 0L118 0C144 0 146 32 172 32L318 32A22 22 0 0 1 340 54L340 "+(FH-22)+"A22 22 0 0 1 318 "+FH+"L22 "+FH+"A22 22 0 0 1 0 "+(FH-22)+"Z";
+const rnd=s=>{let a=s;return()=>{a=(a*16807)%2147483647;return a/2147483647}};
+function folder(k){
+  const cmds=COMMANDS.filter(x=>x.c===k),vis=cmds.slice(0,4),a=ART[k],r=rnd(k.length*97+cmds.length*13);
+  const sheets=vis.map((x,v)=>{
+    const slot=vis.length<=1?0:v/(vis.length-1)*2-1;
+    return `<button class="gf-sheet" type="button" data-n="${esc(x.n)}" style="--slot:${slot};--depth:${vis.length-1-v};--jx:${((r()-.5)*10).toFixed(1)}px;--jr:${((r()-.5)*3.2).toFixed(1)}deg;z-index:${v+1}"><span class="sh-h"><span class="sh-n">${esc(x.n)}</span><span class="sh-m ${x.who}">${WHO[x.who]}</span></span><span class="sh-l"><i style="width:86%"></i><i style="width:92%"></i><i style="width:64%"></i><i style="width:88%"></i></span></button>`}).join('');
+  return `<div class="gf" data-k="${k}" style="width:${GW}px;height:${(272+HEAD)*K}px;--c1:${a[0]};--c2:${a[1]};--c3:${a[2]};--c4:${a[3]}">
+  <div class="gf-stage" style="transform:translateY(${HEAD*K}px) scale(${K})">
+    <div class="gf-shadow"></div>
+    <div class="gf-back" style="clip-path:path('${BACK}')"></div>
+    <svg class="gf-rim" width="340" height="272" viewBox="0 0 340 272" aria-hidden="true"><path d="${BACK}"/></svg>
+    <div class="gf-files" role="list" inert>${sheets}</div>
+    <div class="gf-front" style="clip-path:path('${FRONT}')"><div class="gf-tint"></div>
+      <svg class="gf-rim" viewBox="0 0 340 ${FH}" aria-hidden="true"><path d="${FRONT}"/></svg>
+      <button class="gf-hit" type="button" aria-expanded="false" aria-label="${esc(CATS[k])}، ${cmds.length} أمر"></button>
+      <div class="gf-label"><b>${esc(CATS[k])}</b><span>${cmds.length} أمر</span></div>
+    </div></div></div>`;
+}
+function drawDesk(){
+  $('desk').innerHTML=Object.keys(CATS).map(folder).join('');
+  syncDesk();
+}
+function syncDesk(){
+  document.querySelectorAll('.gf').forEach(f=>{
+    const on=f.dataset.k===cur;
+    f.toggleAttribute('data-open',on);f.toggleAttribute('data-sel',on);
+    f.querySelector('.gf-files').toggleAttribute('inert',!on);
+    f.querySelector('.gf-hit').setAttribute('aria-expanded',on);
+  });
+}
+$('desk').addEventListener('click',e=>{
+  const f=e.target.closest('.gf');if(!f)return;
+  const s=e.target.closest('.gf-sheet');
+  if(s){
+    cur=f.dataset.k;curWho='all';qv='';$('q').value='';drawTabs();drawList();syncDesk();
+    const el=[...document.querySelectorAll('.cmd')].find(d=>d.dataset.n===s.dataset.n);
+    if(el){el.open=true;el.classList.add('hl');setTimeout(()=>el.classList.remove('hl'),1800);el.scrollIntoView({behavior:'smooth',block:'center'});}
+  }else if(e.target.closest('.gf-hit')){
+    cur=cur===f.dataset.k?'all':f.dataset.k;drawTabs();drawList();syncDesk();
+  }
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){document.querySelectorAll('.ov.on').forEach(o=>o.classList.remove('on'));document.body.style.overflow='';if(cur!=='all'){cur='all';drawTabs();drawList();syncDesk();}}});
+
+/* ===== القائمة ===== */
 const stepsOf=x=>x.steps||[`اكتب <code>${esc(x.n)}</code> في أي روم واختره من القائمة.`,...x.opts.filter(o=>o[1]).map(o=>`عبّي الخيار <code>${esc(o[0])}</code>.`),...(x.opts.some(o=>!o[1])?['أضف الخيارات الاختيارية إذا تحتاجها.']:[]),'اضغط Enter.'];
 function drawTabs(){
   const cats=[['all','الكل',COMMANDS.length],...Object.entries(CATS).map(([k,v])=>[k,v,COMMANDS.filter(x=>x.c===k).length])];
-  const t=document.getElementById('tabs');
+  const t=$('tabs');
   t.innerHTML=cats.map(([k,v,n])=>`<button class="tab" type="button" data-k="${k}" aria-pressed="${k===cur}">${v}<small>${n}</small></button>`).join('');
-  t.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{cur=b.dataset.k;drawTabs();drawList();});
-  const w=document.getElementById('whoTabs');
+  t.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{cur=b.dataset.k;drawTabs();drawList();syncDesk();});
+  const w=$('whoTabs');
   w.innerHTML=[['all','كل المستخدمين'],['m','للجميع'],['a','للإداري'],['o','لمنشئ البوت']].map(([k,v])=>`<button class="tab" type="button" data-k="${k}" aria-pressed="${k===curWho}">${v}</button>`).join('');
   w.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{curWho=b.dataset.k;drawTabs();drawList();});
 }
 function card(x){
   const tbl=x.opts.length?`<h4>الخيارات</h4><table class="ot">${x.opts.map(o=>`<tr><td>${esc(o[0])}</td><td class="${o[1]?'rq':'op'}">${o[1]?'مطلوب':'اختياري'}</td><td>${esc(o[2])}</td></tr>`).join('')}</table>`:'';
-  return `<details class="cmd ${x.who==='a'?'adm':x.who==='o'?'own':''}">
+  return `<details class="cmd ${x.who==='a'?'adm':x.who==='o'?'own':''}" data-n="${esc(x.n)}">
     <summary><span class="cmd-n">${esc(x.n)}</span><span class="who ${x.who}">${WHO[x.who]}</span><span class="sd">${esc(x.d)}</span><i class="chev"></i></summary>
-    <div class="body">
-      <div class="perm">الصلاحية المطلوبة: <b>${esc(x.perm)}</b></div>
-      ${tbl}
+    <div class="body"><div class="perm">الصلاحية المطلوبة: <b>${esc(x.perm)}</b></div>${tbl}
       <h4>كيف تستخدمه</h4><ol>${stepsOf(x).map(t=>`<li>${t}</li>`).join('')}</ol>
       <div class="exw"><code>${esc(x.ex)}</code><button class="cp" type="button" data-t="${esc(x.ex)}">نسخ</button></div>
-      ${x.note?`<p class="nt">${esc(x.note)}</p>`:''}
-    </div></details>`;
+      ${x.note?`<p class="nt">${esc(x.note)}</p>`:''}</div></details>`;
 }
 function drawList(){
   const q=qv.trim().toLowerCase();
   const items=COMMANDS.filter(x=>(cur==='all'||x.c===cur)&&(curWho==='all'||x.who===curWho)&&(!q||x.n.toLowerCase().includes(q)||x.d.includes(q)||x.opts.some(o=>o[0].includes(q))));
-  document.getElementById('count').textContent=items.length?`عدد الأوامر المعروضة: ${items.length}`:'';
-  const L=document.getElementById('list');
-  L.innerHTML=items.length?items.map(card).join(''):'<div class="empty">ما لقيت أمر بهذا الاسم. جرّب كلمة ثانية أو غيّر القسم.</div>';
-  L.querySelectorAll('.cmd').forEach((el,i)=>{el.classList.add('rv');el.style.setProperty('--d',Math.min(i,6)*.05+'s');io.observe(el);});
+  $('count').textContent=items.length?`عدد الأوامر المعروضة: ${items.length}`:'';
+  $('list').innerHTML=items.length?items.map(card).join(''):'<div class="empty">ما لقيت أمر بهذا الاسم. جرّب كلمة ثانية أو غيّر القسم.</div>';
 }
-function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),2200);}
-async function copy(txt,msg){
-  try{await navigator.clipboard.writeText(txt);}catch(e){const a=document.createElement('textarea');a.value=txt;document.body.appendChild(a);a.select();try{document.execCommand('copy');}catch(_){}a.remove();}
-  toast(msg);
-}
-document.getElementById('list').addEventListener('click',e=>{const b=e.target.closest('.cp');if(b)copy(b.dataset.t,'تم نسخ المثال');});
-document.getElementById('q').addEventListener('input',e=>{qv=e.target.value;drawList();});
-/* حسابات ديسكورد */
-const DISCORD=['itzf18','fahad_ttl'];
-document.querySelectorAll('[data-dcs]').forEach(el=>{el.innerHTML=DISCORD.map(u=>`<button class="dc" type="button" data-u="${u}">ديسكورد: <b>${u}</b></button>`).join('');});
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),2200);}
+async function copy(txt,msg){try{await navigator.clipboard.writeText(txt);}catch(e){const a=document.createElement('textarea');a.value=txt;document.body.appendChild(a);a.select();try{document.execCommand('copy');}catch(_){}a.remove();}toast(msg);}
+$('list').addEventListener('click',e=>{const b=e.target.closest('.cp');if(b)copy(b.dataset.t,'تم نسخ المثال');});
+$('q').addEventListener('input',e=>{qv=e.target.value;drawList();});
+document.querySelectorAll('[data-dcs]').forEach(el=>{el.innerHTML=['itzf18','fahad_ttl'].map(u=>`<button class="dc" type="button" data-u="${u}">ديسكورد: <b>${u}</b></button>`).join('');});
 document.addEventListener('click',e=>{const b=e.target.closest('.dc');if(b)copy(b.dataset.u,'تم نسخ يوزر ديسكورد: '+b.dataset.u);});
-drawTabs();drawList();
-document.querySelectorAll('.how div,h2.t,.lead').forEach((el,i)=>{el.classList.add('rv');el.style.setProperty('--d',(i%4)*.08+'s');io.observe(el);});
 
-/* ═════════ العرض السينمائي (مثل الفيديو) ═════════ */
-const intro=document.getElementById('intro'),panel=document.getElementById('panel'),cv=document.getElementById('fx'),c=cv.getContext('2d');
-let raf=0;
-const clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,v));
-const lerp=(a,b,t)=>a+(b-a)*t;
-const ease=t=>1-Math.pow(1-t,3);
-const hex=h=>[1,3,5].map(i=>parseInt(h.substr(i,2),16));
-const mix=(a,b,t)=>{const A=hex(a),B=hex(b);return 'rgb('+A.map((v,i)=>Math.round(lerp(v,B[i],t))).join(',')+')';};
+/* النوافذ */
+document.querySelectorAll('[data-ov]').forEach(b=>b.onclick=()=>{$(b.dataset.ov).classList.add('on');document.body.style.overflow='hidden';});
+document.querySelectorAll('.ov').forEach(o=>{o.addEventListener('click',e=>{if(e.target===o||e.target.closest('[data-x]')){o.classList.remove('on');document.body.style.overflow='';}});});
 
-function play(){
-  cancelAnimationFrame(raf);
-  panel.classList.remove('show');
-  intro.classList.add('on');
-  document.body.style.overflow='hidden';
-  if(matchMedia('(prefers-reduced-motion:reduce)').matches){intro.style.background='#04141a';c.clearRect(0,0,cv.width,cv.height);panel.classList.add('show');document.getElementById('closeBtn').focus();return;}
-  intro.style.background='';
-  const d=Math.min(devicePixelRatio||1,2),W=cv.width=innerWidth*d,H=cv.height=innerHeight*d;
-  const cx=W/2,cy=H*0.42,R=Math.min(W,H)*0.2;
-  const P=Array.from({length:140},(_,i)=>{const a=i/140*6.283,rr=R*(1+Math.random()*.35);return{x:Math.random()*W,y:Math.random()*H,tx:cx+Math.cos(a)*rr,ty:cy+Math.sin(a)*rr,s:(5+Math.random()*13)*d,r:Math.random()*6,red:Math.random()<.45,dl:Math.random()*.6}});
-  const t0=performance.now();
-  const starPath=(r,rot)=>{c.beginPath();for(let i=0;i<16;i++){const rr=i%2?r*.3:r,a=i/16*6.283+rot;const x=cx+Math.cos(a)*rr,y=cy+Math.sin(a)*rr;i?c.lineTo(x,y):c.moveTo(x,y);}c.closePath();};
-
-  function frame(now){
-    const t=(now-t0)/1000;
-    /* الخلفية: أبيض ← أحمر داكن ← أزرق داكن */
-    const k1=ease(clamp((t-2.4)/1.1)),k2=ease(clamp((t-3.9)/1.1));
-    const bg=mix(mix('#efede6','#1a0508',k1),'#03161c',k2);
-    c.fillStyle=bg;c.fillRect(0,0,W,H);
-    const fg=mix(mix('#0b0b0f','#f1efe9',k1),'#e8fbff',k2);
-    const ac=mix('#e11d2e','#22d3ee',k2);
-
-    /* القطع تتجمع حول النجمة */
-    for(const p of P){
-      const k=ease(clamp((t-p.dl)/1.5));
-      const x=lerp(p.x,p.tx,k),y=lerp(p.y,p.ty,k);
-      c.save();c.translate(x,y);c.rotate(p.r+t*(1-k)*3);
-      c.fillStyle=p.red?ac:fg;c.fillRect(-p.s/2,-p.s/2,p.s,p.s);c.restore();
-    }
-    /* النجمة الشائكة */
-    const s=ease(clamp((t-1.2)/1));
-    if(s>0){
-      starPath(R*.9*s,t*.35);c.fillStyle=fg;c.fill();c.lineWidth=4*d;c.strokeStyle=ac;c.stroke();
-      c.beginPath();c.arc(cx,cy,R*.13*s,0,6.283);c.fillStyle=ac;c.fill();
-    }
-    /* السلسلة */
-    const ca=clamp((t-1.8)/.8);
-    if(ca>0){
-      c.globalAlpha=ca;c.lineWidth=7*d;c.strokeStyle=mix(mix('#55555f','#c9ccd4',k1),'#7be8ff',k2);
-      const x0=-W*.1,y0=H*.82,x1=W*1.1,y1=H*.2,dx=x1-x0,dy=y1-y0,len=Math.hypot(dx,dy),ang=Math.atan2(dy,dx),gap=44*d,off=(t*130*d)%(gap*2);
-      for(let i=-2;i*gap<len;i++){
-        const u=i*gap+off,wob=Math.sin(u*.006+t*2)*26*d;
-        const x=x0+Math.cos(ang)*u-Math.sin(ang)*wob,y=y0+Math.sin(ang)*u+Math.cos(ang)*wob;
-        c.beginPath();c.ellipse(x,y,(i%2?15:26)*d,13*d,ang,0,6.283);c.stroke();
-      }
-      c.globalAlpha=1;
-    }
-    if(t>4.7&&!panel.classList.contains('show')){panel.classList.add('show');document.getElementById('closeBtn').focus();}
-    raf=requestAnimationFrame(frame);
-  }
-  raf=requestAnimationFrame(frame);
-}
-function stop(){cancelAnimationFrame(raf);intro.classList.remove('on');panel.classList.remove('show');document.body.style.overflow='';document.getElementById('whatBtn').focus();}
-const guide=document.getElementById('guide');let gT=0;
-function guideOpen(){
-  guide.classList.add('on');document.body.style.overflow='hidden';
-  const seq=['/','/b','/ba','/ban','/ban @العضو','/ban @العضو السبب'],ty=document.getElementById('typed'),sg=document.getElementById('sug');let i=0;
-  const step=()=>{
-    const v=seq[i%seq.length];ty.textContent=v;
-    const m=v.includes(' ')?[]:COMMANDS.filter(x=>x.n.startsWith(v)).slice(0,3);
-    sg.innerHTML=m.map(x=>`<div><b>${esc(x.n)}</b>${esc(x.d.slice(0,46))}</div>`).join('');
-    i++;gT=setTimeout(step,i%seq.length===0?2200:900);
-  };
-  clearTimeout(gT);step();document.getElementById('gClose').focus();
-}
-function guideClose(){clearTimeout(gT);guide.classList.remove('on');document.body.style.overflow='';document.getElementById('guideBtn').focus();}
-document.getElementById('guideBtn').onclick=guideOpen;
-document.getElementById('gClose').onclick=guideClose;
-guide.addEventListener('click',e=>{if(e.target===guide)guideClose();});
-document.getElementById('whatBtn').onclick=play;
-document.getElementById('closeBtn').onclick=stop;
-addEventListener('keydown',e=>{if(e.key!=='Escape')return;if(intro.classList.contains('on'))stop();else if(guide.classList.contains('on'))guideClose();});
+drawDesk();drawTabs();drawList();
+/* إغلاق المجلد بالضغط خارجه */
+document.addEventListener('pointerdown',e=>{if(cur!=='all'&&!e.target.closest('.gf,.cmds,.tabs,.tools')){cur='all';drawTabs();drawList();syncDesk();}});
 </script>
 </body>
 </html>
