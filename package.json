@@ -1,14 +1,11 @@
 {
-  "name": "rty-dragon-bot",
+  "name": "discord-downloader-bot",
   "version": "1.0.0",
-  "description": "Discord Bot",
   "main": "index.js",
+  "scripts": { "start": "node index.js" },
+  "engines": { "node": ">=18" },
   "dependencies": {
-    "discord.js": "^14.14.0",
-    "@discordjs/voice": "latest",
-    "@snazzah/davey": "latest",
-    "opusscript": "latest",
-    "libsodium-wrappers": "latest",
-    "youtubei.js": "latest"
+    "discord.js": "^14.16.0",
+    "dotenv": "^16.4.5"
   }
 }
